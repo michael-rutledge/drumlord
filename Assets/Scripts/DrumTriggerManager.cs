@@ -29,6 +29,17 @@ public class DrumTriggerManager : MonoBehaviour {
         startTime = Time.fixedTime;
         oldRightPos = stickRightHead.transform.position;
         oldLeftPos = stickLeftHead.transform.position;
+        // START DEBUG MIDI PRINTING
+        MidiFile midi = new MidiFile("Assets/SongData/UptownFunk/uptownFunkExpert.mid");
+        foreach (MidiEvent note in midi.Events[0])
+        {
+            if (note.CommandCode == MidiCommandCode.NoteOn)
+            {
+                NoteOnEvent tempNote = (NoteOnEvent)note;
+                Debug.Log("Note of " + tempNote.NoteName + " on at " + note.AbsoluteTime.ToString());
+            }
+        }
+        // END DEBUG MIDI PRINTING
     }
 	
 	// Update is called once per frame
