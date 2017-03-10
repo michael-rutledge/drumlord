@@ -31,14 +31,30 @@ public class DrumTriggerManager : MonoBehaviour {
         oldLeftPos = stickLeftHead.transform.position;
         // START DEBUG MIDI PRINTING
         MidiFile midi = new MidiFile("Assets/SongData/UptownFunk/uptownFunkExpert.mid");
+        TempoEvent tempo = null;
+        int bpm = 1;
+        int totalNotes = 0;
         foreach (MidiEvent note in midi.Events[0])
         {
-            if (note.CommandCode == MidiCommandCode.NoteOn)
+            // at beginning, get bpm
+            if (note is NAudio.Midi.TempoEvent)
             {
+                tempo = (TempoEvent)note;
+                double secondsPerQuarterNote = (double)tempo.MicrosecondsPerQuarterNote / 1000000;
+                bpm = (int)(1 / secondsPerQuarterNote * 60);
+                Debug.Log("Tempo Event with microSecondsPerQuarterNote " + bpm);
+            }
+            // for actual note hits, report back information
+            if (tempo != null && note.CommandCode == MidiCommandCode.NoteOn)
+            {
+                totalNotes++;
                 NoteOnEvent tempNote = (NoteOnEvent)note;
-                Debug.Log("Note of " + tempNote.NoteName + " on at " + note.AbsoluteTime.ToString());
+                float quarterNoteOn = (float)note.AbsoluteTime / midi.DeltaTicksPerQuarterNote;
+                float realTime = quarterNoteOn * 60 / bpm;
+                Debug.Log("Note of " + tempNote.NoteName + " on at " + realTime);
             }
         }
+        Debug.Log("Total drum hits in uptown funk: " + totalNotes);
         // END DEBUG MIDI PRINTING
     }
 	
