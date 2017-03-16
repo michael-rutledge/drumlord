@@ -23,9 +23,12 @@ public class SongManager : MonoBehaviour {
     private AudioSource songAudio;
     private const float EPSILON = 0.01f;
     private const float AUDIO_DELAY = 0.1f;
+    public DrumTriggerManager snareManager;
 
     // Use this for initialization
     void Start () {
+        // init drum managers
+        // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
         midi = new MidiFile("Assets/SongData/UptownFunk/uptownFunkExpert.mid");
@@ -63,16 +66,15 @@ public class SongManager : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         float curTime = Time.fixedTime;
+        Note curNote;
         // for every note that is currently active, do something
-		while (curIndex < notes.Count
+        while (curIndex < notes.Count
             && notes.ElementAt(curIndex).timestamp < curTime - realStartTime + EPSILON
             && notes.ElementAt(curIndex).timestamp > curTime - realStartTime - EPSILON)
         {
             // right now, all we are doing is printing out the note's data
-            Note curNote = notes.ElementAt(curIndex);
-            if (curNote.value == "D3")
-                Debug.Log("SNARE AT " + curTime + " with timestamp " + curNote.timestamp);
-            //Debug.Log("Note " + curNote.value + " hit at time " + curNote.timestamp);
+            curNote = notes.ElementAt(curIndex);
+            Debug.Log("Note " + curNote.value + " hit at time " + curNote.timestamp);
             curIndex++;
         }
 	}

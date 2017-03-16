@@ -10,32 +10,31 @@ public class DrumTriggerManager : MonoBehaviour {
     public SteamVR_TrackedObject leftHand;
     private SteamVR_Controller.Device leftDevice;
     // Time data
-    private double rightHit;
-    private double leftHit;
-    private double startTime;
+    public double rightHit;
+    public double leftHit;
+    public double startTime;
+    private const float AUDIO_DELAY = 0.1f;
     // Position data
     public GameObject stickRightHead;
     public GameObject stickLeftHead;
     private Vector3 oldRightPos;
     private Vector3 oldLeftPos;
-    // Audio data
-    private AudioSource audio;
 
     // Use this for initialization
     void Start () {
-        audio = GetComponent<AudioSource>();
         rightHit = leftHit = -1.0;
-        startTime = Time.fixedTime;
+        startTime = Time.fixedTime + AUDIO_DELAY;
         oldRightPos = stickRightHead.transform.position;
         oldLeftPos = stickLeftHead.transform.position;
     }
 	
 	// Update is called once per frame
 	void Update () {
-        rightDevice = SteamVR_Controller.Input((int)rightHand.index);
-        leftDevice = SteamVR_Controller.Input((int)leftHand.index);
-        oldRightPos = stickRightHead.transform.position;
-        oldLeftPos = stickLeftHead.transform.position;
+        //rightDevice = SteamVR_Controller.Input((int)rightHand.index);
+        //leftDevice = SteamVR_Controller.Input((int)leftHand.index);
+        //oldRightPos = stickRightHead.transform.position;
+        //oldLeftPos = stickLeftHead.transform.position;
+        rightHit = Time.fixedTime;
     }
 
     // To be called when other objects collide
@@ -46,7 +45,6 @@ public class DrumTriggerManager : MonoBehaviour {
         if (other.gameObject.name.Equals("StickRightHead") &&
             oldRightPos.y > stickRightHead.transform.position.y)
         {
-            //audio.Play();
             SteamVR_Controller.Input((int)rightHand.index).TriggerHapticPulse((ushort)2000);
             float angM = rightDevice.angularVelocity.magnitude;
             Debug.Log(this.name + " collision with " + other.gameObject.name +
@@ -57,7 +55,6 @@ public class DrumTriggerManager : MonoBehaviour {
         if (other.gameObject.name.Equals("StickLeftHead") &&
             oldLeftPos.y > stickLeftHead.transform.position.y)
         {
-            //audio.Play();
             SteamVR_Controller.Input((int)leftHand.index).TriggerHapticPulse((ushort)2000);
             float angM = leftDevice.angularVelocity.magnitude;
             Debug.Log(this.name + " collision with " + other.gameObject.name +
