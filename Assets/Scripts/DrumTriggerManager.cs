@@ -30,11 +30,10 @@ public class DrumTriggerManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //rightDevice = SteamVR_Controller.Input((int)rightHand.index);
-        //leftDevice = SteamVR_Controller.Input((int)leftHand.index);
-        //oldRightPos = stickRightHead.transform.position;
-        //oldLeftPos = stickLeftHead.transform.position;
-        rightHit = Time.fixedTime;
+        rightDevice = SteamVR_Controller.Input((int)rightHand.index);
+        leftDevice = SteamVR_Controller.Input((int)leftHand.index);
+        oldRightPos = stickRightHead.transform.position;
+        oldLeftPos = stickLeftHead.transform.position;
     }
 
     // To be called when other objects collide
@@ -47,9 +46,9 @@ public class DrumTriggerManager : MonoBehaviour {
         {
             SteamVR_Controller.Input((int)rightHand.index).TriggerHapticPulse((ushort)2000);
             float angM = rightDevice.angularVelocity.magnitude;
-            Debug.Log(this.name + " collision with " + other.gameObject.name +
-                " with velocity " + angM + " at time " + curTime);
             rightHit = curTime - startTime;
+            Debug.Log(this.name + " collision with " + other.gameObject.name +
+                " with velocity " + angM + " at time " + rightHit);
         }
         // Check if left stick hits drum
         if (other.gameObject.name.Equals("StickLeftHead") &&
@@ -57,9 +56,9 @@ public class DrumTriggerManager : MonoBehaviour {
         {
             SteamVR_Controller.Input((int)leftHand.index).TriggerHapticPulse((ushort)2000);
             float angM = leftDevice.angularVelocity.magnitude;
-            Debug.Log(this.name + " collision with " + other.gameObject.name +
-                " with velocity " + angM + " at time " + curTime);
             leftHit = curTime - startTime;
+            Debug.Log(this.name + " collision with " + other.gameObject.name +
+                " with velocity " + angM + " at time " + leftHit);
         }
     }
 
@@ -71,6 +70,6 @@ public class DrumTriggerManager : MonoBehaviour {
 
     void OnGUI() {
         GUI.Label( new Rect(450, 100, 100, 100),
-            ("" + stickRightHead.transform.position.y) );
+            ("" + rightHit) );
     }
 }

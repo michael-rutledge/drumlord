@@ -20,9 +20,10 @@ public class SongManager : MonoBehaviour {
     private float realStartTime;
     private int curIndex = 0;
     private AudioSource[] audioSources;
-    private AudioSource songAudio;
-    private const float EPSILON = 0.01f;
+    private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio;
+    private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.1f;
+    private const float HIT_WINDOW = 0.04f;
     public DrumTriggerManager snareManager;
 
     // Use this for initialization
@@ -31,6 +32,10 @@ public class SongManager : MonoBehaviour {
         // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
+        bassAudio = audioSources[1];
+        snareAudio = audioSources[2];
+        hihatAudio = audioSources[3];
+        cymbalAudio = audioSources[4];
         midi = new MidiFile("Assets/SongData/UptownFunk/uptownFunkExpert.mid");
         tempo = null;
         bpm = 1;
@@ -60,7 +65,12 @@ public class SongManager : MonoBehaviour {
         }
         Debug.Log("Total drum hits in song: " + totalNotes);
         realStartTime = Time.fixedTime + AUDIO_DELAY;
+        // play all tracks
         songAudio.Play();
+        bassAudio.Play();
+        snareAudio.Play();
+        hihatAudio.Play();
+        cymbalAudio.Play();
     }
 
     // Update is called once per frame
@@ -74,8 +84,21 @@ public class SongManager : MonoBehaviour {
         {
             // right now, all we are doing is printing out the note's data
             curNote = notes.ElementAt(curIndex);
-            Debug.Log("Note " + curNote.value + " hit at time " + curNote.timestamp);
+            Debug.Log("Note " + curNote.value + ", " + curNote.timestamp + " hit at time "
+                + (curTime - realStartTime));
             curIndex++;
+            //Debug.Log(snareManager.rightHit);
+            /*
+            if (curTime - snareManager.rightHit <= HIT_WINDOW ||
+                curTime - snareManager.leftHit <= HIT_WINDOW)
+            {
+                snareAudio.volume = 1.0f;
+            }
+            else
+            {
+                snareAudio.volume = 0.0f;
+            }
+            */
         }
-	}
+    }
 }
