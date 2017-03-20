@@ -44,7 +44,7 @@ public class DrumTriggerManager : MonoBehaviour {
         if (other.gameObject.name.Equals("StickRightHead") &&
             oldRightPos.y > stickRightHead.transform.position.y)
         {
-            SteamVR_Controller.Input((int)rightHand.index).TriggerHapticPulse((ushort)2000);
+            SteamVR_Controller.Input((int)rightHand.index).TriggerHapticPulse((ushort)4000);
             float angM = rightDevice.angularVelocity.magnitude;
             rightHit = curTime - startTime;
             Debug.Log(this.name + " collision with " + other.gameObject.name +
@@ -54,7 +54,7 @@ public class DrumTriggerManager : MonoBehaviour {
         if (other.gameObject.name.Equals("StickLeftHead") &&
             oldLeftPos.y > stickLeftHead.transform.position.y)
         {
-            SteamVR_Controller.Input((int)leftHand.index).TriggerHapticPulse((ushort)2000);
+            SteamVR_Controller.Input((int)leftHand.index).TriggerHapticPulse((ushort)4000);
             float angM = leftDevice.angularVelocity.magnitude;
             leftHit = curTime - startTime;
             Debug.Log(this.name + " collision with " + other.gameObject.name +

@@ -23,7 +23,7 @@ public class SongManager : MonoBehaviour {
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio;
     private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.1f;
-    private const float HIT_WINDOW = 0.04f;
+    private const float HIT_WINDOW = 0.1f;
     public DrumTriggerManager snareManager;
 
     // Use this for initialization
@@ -75,30 +75,32 @@ public class SongManager : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        float curTime = Time.fixedTime;
+        float curTime = Time.fixedTime - realStartTime;
         Note curNote;
         // for every note that is currently active, do something
         while (curIndex < notes.Count
-            && notes.ElementAt(curIndex).timestamp < curTime - realStartTime + EPSILON
-            && notes.ElementAt(curIndex).timestamp > curTime - realStartTime - EPSILON)
+            && notes.ElementAt(curIndex).timestamp + HIT_WINDOW/2 < curTime + EPSILON
+            && notes.ElementAt(curIndex).timestamp + HIT_WINDOW/2 > curTime - EPSILON)
         {
             // right now, all we are doing is printing out the note's data
             curNote = notes.ElementAt(curIndex);
-            Debug.Log("Note " + curNote.value + ", " + curNote.timestamp + " hit at time "
-                + (curTime - realStartTime));
+            //Debug.Log("Note " + curNote.value + ", " + curNote.timestamp + " hit at time "
+            //    + curTime);
             curIndex++;
-            //Debug.Log(snareManager.rightHit);
-            /*
-            if (curTime - snareManager.rightHit <= HIT_WINDOW ||
-                curTime - snareManager.leftHit <= HIT_WINDOW)
+            // snare hit detection
+            if (curNote.value == "D3" || curNote.value == "E3")
             {
-                snareAudio.volume = 1.0f;
+                Debug.Log("curTime: " + curTime + ", rightHit: " + snareManager.rightHit);
+                if (curTime - snareManager.rightHit <= HIT_WINDOW ||
+                    curTime - snareManager.leftHit <= HIT_WINDOW)
+                {
+                    snareAudio.volume = 1.0f;
+                }
+                else
+                {
+                    snareAudio.volume = 0.0f;
+                }
             }
-            else
-            {
-                snareAudio.volume = 0.0f;
-            }
-            */
         }
     }
 }
