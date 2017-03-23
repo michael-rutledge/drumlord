@@ -6,6 +6,9 @@ using NAudio.Midi;
 
 public class SongManager : MonoBehaviour {
 
+    private const float EPSILON = 0.022f;
+    private const float AUDIO_DELAY = 0.1f;
+    private const float HIT_WINDOW = 0.1f;
     // struct to represent drum note
     public class Note
     {
@@ -15,15 +18,13 @@ public class SongManager : MonoBehaviour {
     public MidiFile midi;
     public TempoEvent tempo;
     public List<Note> notes = new List<Note>();
+    private List<Note> notesInWindow = new List<Note>();
     public int bpm;
     public int totalNotes;
     private float realStartTime;
     private int curIndex = 0;
     private AudioSource[] audioSources;
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio;
-    private const float EPSILON = 0.022f;
-    private const float AUDIO_DELAY = 0.1f;
-    private const float HIT_WINDOW = 0.1f;
     public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager;
 
     // Use this for initialization
@@ -36,7 +37,7 @@ public class SongManager : MonoBehaviour {
         snareAudio = audioSources[2];
         hihatAudio = audioSources[3];
         cymbalAudio = audioSources[4];
-        midi = new MidiFile("Assets/SongData/UptownFunk/uptownFunkExpert.mid");
+        midi = new MidiFile("Assets/SongData/uptownFunk/uptownFunkExpert.mid");
         tempo = null;
         bpm = 1;
         totalNotes = 0;
@@ -73,61 +74,84 @@ public class SongManager : MonoBehaviour {
         cymbalAudio.Play();
     }
 
+
     // Update is called once per frame
-    void Update () {
+    void Update() {
         float curTime = Time.fixedTime - realStartTime;
         Note curNote;
         // for every note that is currently active, do something
         while (curIndex < notes.Count
-            && notes.ElementAt(curIndex).timestamp + HIT_WINDOW/2 < curTime + EPSILON
-            && notes.ElementAt(curIndex).timestamp + HIT_WINDOW/2 > curTime - EPSILON)
+            && notes.ElementAt(curIndex).timestamp - HIT_WINDOW / 2 < curTime + EPSILON
+            && notes.ElementAt(curIndex).timestamp - HIT_WINDOW / 2 > curTime - EPSILON)
         {
             // right now, all we are doing is printing out the note's data
             curNote = notes.ElementAt(curIndex);
-            //Debug.Log("Note " + curNote.value + ", " + curNote.timestamp + " hit at time "
-            //    + curTime);
             curIndex++;
+            Debug.Log("curTime: " + curTime + ", timestamp: " + curNote.timestamp);
             SteamVR_Controller.Input((int)snareManager.rightHand.index).TriggerHapticPulse((ushort)3999);
-            // snare hit detection
-            if (curNote.value == "D3" || curNote.value == "E3")
+            // add note to notes currently in hit window
+            notesInWindow.Add(curNote);
+        }
+
+        // go trough notes currently in hit window
+        for (int i = 0; i < notesInWindow.Count; i++)
+        {
+            Note elem = notesInWindow.ElementAt(i);
+            float windowStart = elem.timestamp - HIT_WINDOW / 2;
+            // note missed
+            if (curTime - elem.timestamp > HIT_WINDOW / 2)
             {
-                Debug.Log("curTime: " + curTime + ", rightHit: " + snareManager.rightHit);
-                if (curTime - snareManager.rightHit <= HIT_WINDOW ||
-                    curTime - snareManager.leftHit <= HIT_WINDOW)
-                {
-                    snareAudio.volume = 1.0f;
-                }
-                else
+                // snare
+                if (elem.value == "D3" || elem.value == "E3")
                 {
                     snareAudio.volume = 0.0f;
                 }
-            }
-            // hihat hit detection
-            if (curNote.value == "F#3" || curNote.value == "G#3" || curNote.value == "A#3")
-            {
-                Debug.Log("curTime: " + curTime + ", rightHit: " + hihatManager.rightHit);
-                if (curTime - hihatManager.rightHit <= HIT_WINDOW ||
-                    curTime - hihatManager.leftHit <= HIT_WINDOW)
-                {
-                    hihatAudio.volume = 1.0f;
-                }
-                else
+                // hihat
+                if (elem.value == "F#3" || elem.value == "G#3" || elem.value == "A#3")
                 {
                     hihatAudio.volume = 0.0f;
                 }
-            }
-            // crash hit detection
-            if (curNote.value == "C#4")
-            {
-                Debug.Log("curTime: " + curTime + ", rightHit: " + crashManager.rightHit);
-                if (curTime - crashManager.rightHit <= HIT_WINDOW ||
-                    curTime - crashManager.leftHit <= HIT_WINDOW)
-                {
-                    cymbalAudio.volume = 1.0f;
-                }
-                else
+                // hihat
+                if (elem.value == "C#4" || elem.value == "D#4" || elem.value == "F4")
                 {
                     cymbalAudio.volume = 0.0f;
+                }
+                notesInWindow.RemoveAt(i);
+            }
+            // note hit
+            else
+            {
+                // snare
+                if ((elem.value == "D3" || elem.value == "E3") &&
+                    (snareManager.rightHit >= windowStart ||
+                    snareManager.leftHit >= windowStart))
+                {
+                    snareAudio.volume = 1.0f;
+                    notesInWindow.RemoveAt(i);
+                }
+                // hihat
+                if ((elem.value == "F#3" || elem.value == "G#3" || elem.value == "A#3") &&
+                    (hihatManager.rightHit >= windowStart ||
+                    hihatManager.leftHit >= windowStart))
+                {
+                    hihatAudio.volume = 1.0f;
+                    notesInWindow.RemoveAt(i);
+                }
+                // crash
+                if ((elem.value == "C#4") &&
+                    (crashManager.rightHit >= windowStart ||
+                    crashManager.leftHit >= windowStart))
+                {
+                    cymbalAudio.volume = 1.0f;
+                    notesInWindow.RemoveAt(i);
+                }
+                // ride
+                if ((elem.value == "D#4" || elem.value == "F4") &&
+                    (rideManager.rightHit >= windowStart ||
+                    rideManager.leftHit >= windowStart))
+                {
+                    cymbalAudio.volume = 1.0f;
+                    notesInWindow.RemoveAt(i);
                 }
             }
         }
