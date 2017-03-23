@@ -24,7 +24,7 @@ public class SongManager : MonoBehaviour {
     private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.1f;
     private const float HIT_WINDOW = 0.1f;
-    public DrumTriggerManager snareManager;
+    public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager;
 
     // Use this for initialization
     void Start () {
@@ -87,6 +87,7 @@ public class SongManager : MonoBehaviour {
             //Debug.Log("Note " + curNote.value + ", " + curNote.timestamp + " hit at time "
             //    + curTime);
             curIndex++;
+            SteamVR_Controller.Input((int)snareManager.rightHand.index).TriggerHapticPulse((ushort)3999);
             // snare hit detection
             if (curNote.value == "D3" || curNote.value == "E3")
             {
@@ -99,6 +100,34 @@ public class SongManager : MonoBehaviour {
                 else
                 {
                     snareAudio.volume = 0.0f;
+                }
+            }
+            // hihat hit detection
+            if (curNote.value == "F#3" || curNote.value == "G#3" || curNote.value == "A#3")
+            {
+                Debug.Log("curTime: " + curTime + ", rightHit: " + hihatManager.rightHit);
+                if (curTime - hihatManager.rightHit <= HIT_WINDOW ||
+                    curTime - hihatManager.leftHit <= HIT_WINDOW)
+                {
+                    hihatAudio.volume = 1.0f;
+                }
+                else
+                {
+                    hihatAudio.volume = 0.0f;
+                }
+            }
+            // crash hit detection
+            if (curNote.value == "C#4")
+            {
+                Debug.Log("curTime: " + curTime + ", rightHit: " + crashManager.rightHit);
+                if (curTime - crashManager.rightHit <= HIT_WINDOW ||
+                    curTime - crashManager.leftHit <= HIT_WINDOW)
+                {
+                    cymbalAudio.volume = 1.0f;
+                }
+                else
+                {
+                    cymbalAudio.volume = 0.0f;
                 }
             }
         }
