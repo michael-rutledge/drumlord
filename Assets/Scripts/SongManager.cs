@@ -88,7 +88,6 @@ public class SongManager : MonoBehaviour {
             curNote = notes.ElementAt(curIndex);
             curIndex++;
             Debug.Log("curTime: " + curTime + ", timestamp: " + curNote.timestamp);
-            SteamVR_Controller.Input((int)snareManager.rightHand.index).TriggerHapticPulse((ushort)3999);
             // add note to notes currently in hit window
             notesInWindow.Add(curNote);
         }
