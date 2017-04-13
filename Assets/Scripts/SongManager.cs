@@ -7,14 +7,16 @@ using NAudio.Midi;
 public class SongManager : MonoBehaviour {
 
     private const float EPSILON = 0.022f;
-    private const float AUDIO_DELAY = 0.1f;
+    private const float AUDIO_DELAY = 0.0f;
     private const float HIT_WINDOW = 0.1f;
-    // struct to represent drum note
+    // note representations
     public class Note
     {
         public string value;       // what note is it; i.e. C#3, F3, E4, etc
         public float timestamp;    // moment in realtime when note is hit (in seconds)
+        public GameObject rollNote;// 3d object representation of note
     };
+    // MIDI stuff
     public MidiFile midi;
     public TempoEvent tempo;
     public List<Note> notes = new List<Note>();
@@ -23,13 +25,15 @@ public class SongManager : MonoBehaviour {
     public int totalNotes;
     private float realStartTime;
     private int curIndex = 0;
+    private int curRollIndex = 0;
+    private GameObject roll;
+    // Audio stuff
     private AudioSource[] audioSources;
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio;
     public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager;
 
     // Use this for initialization
     void Start () {
-        // init drum managers
         // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
@@ -61,6 +65,7 @@ public class SongManager : MonoBehaviour {
                 Note noteToAdd = new global::SongManager.Note();
                 noteToAdd.value = tempNote.NoteName;
                 noteToAdd.timestamp = realTime;
+                noteToAdd.rollNote = null;
                 notes.Add(noteToAdd);
             }
         }
@@ -72,6 +77,8 @@ public class SongManager : MonoBehaviour {
         snareAudio.Play();
         hihatAudio.Play();
         cymbalAudio.Play();
+        // get roll sheet
+        roll = GameObject.Find("Roll");
     }
 
 
@@ -86,13 +93,29 @@ public class SongManager : MonoBehaviour {
         {
             // right now, all we are doing is printing out the note's data
             curNote = notes.ElementAt(curIndex);
-            curIndex++;
-            Debug.Log("curTime: " + curTime + ", timestamp: " + curNote.timestamp);
+            ++curIndex;
             // add note to notes currently in hit window
             notesInWindow.Add(curNote);
         }
 
-        // go trough notes currently in hit window
+        // spawn roll notes
+        Note curRollNote;
+        while (curRollIndex < notes.Count
+            && notes.ElementAt(curRollIndex).timestamp - 1.2 < curTime + EPSILON
+            && notes.ElementAt(curRollIndex).timestamp - 1.2 > curTime - EPSILON)
+        {
+            curRollNote = notes.ElementAt(curIndex);
+            curRollNote.rollNote = (GameObject)Instantiate(Resources.Load("RollNote"));
+            //curRollNote.rollNote.transform.parent = roll.transform;
+            curRollNote.rollNote.transform.SetParent(roll.transform, false);
+            // deal with the dumb whack values
+            //curRollNote.rollNote.transform.position = new Vector3(0.0f, 0.0f, 4.45f);
+            //curRollNote.rollNote.transform.rotation = new Quaternion(64.049f, 0.0f, 0.0f, 0.0f);
+            //curRollNote.rollNote.transform.localScale = new Vector3(1.25f, 0.83f, 0.49f);
+            ++curRollIndex;
+        }
+
+        // go trough notes currently in hit window to for hit detection
         for (int i = 0; i < notesInWindow.Count; i++)
         {
             Note elem = notesInWindow.ElementAt(i);
@@ -115,6 +138,7 @@ public class SongManager : MonoBehaviour {
                 {
                     cymbalAudio.volume = 0.0f;
                 }
+                DestroyImmediate(elem.rollNote);
                 notesInWindow.RemoveAt(i);
             }
             // note hit
@@ -126,6 +150,7 @@ public class SongManager : MonoBehaviour {
                     snareManager.leftHit >= windowStart))
                 {
                     snareAudio.volume = 1.0f;
+                    DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
                 }
                 // hihat
@@ -134,6 +159,7 @@ public class SongManager : MonoBehaviour {
                     hihatManager.leftHit >= windowStart))
                 {
                     hihatAudio.volume = 1.0f;
+                    DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
                 }
                 // crash
@@ -142,6 +168,7 @@ public class SongManager : MonoBehaviour {
                     crashManager.leftHit >= windowStart))
                 {
                     cymbalAudio.volume = 1.0f;
+                    DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
                 }
                 // ride
@@ -150,6 +177,7 @@ public class SongManager : MonoBehaviour {
                     rideManager.leftHit >= windowStart))
                 {
                     cymbalAudio.volume = 1.0f;
+                    DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
                 }
             }

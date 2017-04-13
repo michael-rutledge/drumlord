@@ -13,7 +13,7 @@ public class DrumTriggerManager : MonoBehaviour {
     public double rightHit;
     public double leftHit;
     public double startTime;
-    private const float AUDIO_DELAY = 0.1f;
+    private const float AUDIO_DELAY = 0.0f;
     // Position data
     public GameObject stickRightHead;
     public GameObject stickLeftHead;
