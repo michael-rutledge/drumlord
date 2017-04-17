@@ -7,8 +7,9 @@ using NAudio.Midi;
 public class SongManager : MonoBehaviour {
 
     private const float EPSILON = 0.022f;
-    private const float AUDIO_DELAY = 0.0f;
+    private const float AUDIO_DELAY = 0.07f;
     private const float HIT_WINDOW = 0.1f;
+    private const float ROLL_TIME = 2.4f;
     // note representations
     public class Note
     {
@@ -101,18 +102,54 @@ public class SongManager : MonoBehaviour {
         // spawn roll notes
         Note curRollNote;
         while (curRollIndex < notes.Count
-            && notes.ElementAt(curRollIndex).timestamp - 1.2 < curTime + EPSILON
-            && notes.ElementAt(curRollIndex).timestamp - 1.2 > curTime - EPSILON)
+            && notes.ElementAt(curRollIndex).timestamp - ROLL_TIME < curTime )
         {
-            curRollNote = notes.ElementAt(curIndex);
+            curRollNote = notes.ElementAt(curRollIndex);
+            // make a clone of RollNote prefab then make its parent the roll
+            // this allows for relative transforms making it easy to move the notes
             curRollNote.rollNote = (GameObject)Instantiate(Resources.Load("RollNote"));
-            //curRollNote.rollNote.transform.parent = roll.transform;
             curRollNote.rollNote.transform.SetParent(roll.transform, false);
-            // deal with the dumb whack values
-            //curRollNote.rollNote.transform.position = new Vector3(0.0f, 0.0f, 4.45f);
-            //curRollNote.rollNote.transform.rotation = new Quaternion(64.049f, 0.0f, 0.0f, 0.0f);
-            //curRollNote.rollNote.transform.localScale = new Vector3(1.25f, 0.83f, 0.49f);
+            // move the notes horizontally based upon their 
+            if (isSnare(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(-.05f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 0, 0, 1);
+            }
+            else if (isHiHat(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(-.02f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 1, 0, 1);
+            }
+            else if (isCrash(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(-0.01f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0, 1, 0, 1);
+            }
+            else if (isRide(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(.02f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 1, 1);
+            }
+            else
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(.05f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 0.5f, 0, 1);
+                Debug.Log("other note");
+            }
             ++curRollIndex;
+        }
+        // move roll notes
+        for (int i = 0; i < notes.Count; i++)
+        {
+            Note n = notes.ElementAt(i);
+
+            if (n.rollNote != null)
+            {
+                float rollTick = 8.9f * Time.deltaTime / ROLL_TIME;
+                Vector3 oldPos = n.rollNote.transform.localPosition;
+                n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
+                Debug.Log("ote " + n.value);
+            }
         }
 
         // go trough notes currently in hit window to for hit detection
@@ -124,17 +161,17 @@ public class SongManager : MonoBehaviour {
             if (curTime - elem.timestamp > HIT_WINDOW / 2)
             {
                 // snare
-                if (elem.value == "D3" || elem.value == "E3")
+                if (isSnare(elem))
                 {
                     snareAudio.volume = 0.0f;
                 }
                 // hihat
-                if (elem.value == "F#3" || elem.value == "G#3" || elem.value == "A#3")
+                if (isHiHat(elem))
                 {
                     hihatAudio.volume = 0.0f;
                 }
-                // hihat
-                if (elem.value == "C#4" || elem.value == "D#4" || elem.value == "F4")
+                // crash and ride
+                if (isCrash(elem) || isRide(elem))
                 {
                     cymbalAudio.volume = 0.0f;
                 }
@@ -145,7 +182,7 @@ public class SongManager : MonoBehaviour {
             else
             {
                 // snare
-                if ((elem.value == "D3" || elem.value == "E3") &&
+                if (isSnare(elem) &&
                     (snareManager.rightHit >= windowStart ||
                     snareManager.leftHit >= windowStart))
                 {
@@ -154,7 +191,7 @@ public class SongManager : MonoBehaviour {
                     notesInWindow.RemoveAt(i);
                 }
                 // hihat
-                if ((elem.value == "F#3" || elem.value == "G#3" || elem.value == "A#3") &&
+                if (isHiHat(elem) &&
                     (hihatManager.rightHit >= windowStart ||
                     hihatManager.leftHit >= windowStart))
                 {
@@ -163,7 +200,7 @@ public class SongManager : MonoBehaviour {
                     notesInWindow.RemoveAt(i);
                 }
                 // crash
-                if ((elem.value == "C#4") &&
+                if (isCrash(elem) &&
                     (crashManager.rightHit >= windowStart ||
                     crashManager.leftHit >= windowStart))
                 {
@@ -172,7 +209,7 @@ public class SongManager : MonoBehaviour {
                     notesInWindow.RemoveAt(i);
                 }
                 // ride
-                if ((elem.value == "D#4" || elem.value == "F4") &&
+                if (isRide(elem) &&
                     (rideManager.rightHit >= windowStart ||
                     rideManager.leftHit >= windowStart))
                 {
@@ -182,5 +219,23 @@ public class SongManager : MonoBehaviour {
                 }
             }
         }
+    }
+
+    // helper boolean functions to determine what kind of hit it is
+    bool isSnare(Note note)
+    {
+        return note.value == "D3" || note.value == "E3";
+    }
+    bool isHiHat(Note note)
+    {
+        return note.value == "F#3" || note.value == "G#3" || note.value == "A#3";
+    }
+    bool isCrash(Note note)
+    {
+        return note.value == "C#4";
+    }
+    bool isRide(Note note)
+    {
+        return note.value == "D#4" || note.value == "F4";
     }
 }
