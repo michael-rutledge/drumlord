@@ -31,8 +31,8 @@ sysinfo.txt
 *.unitypackage
 
 # Song data; it's just audio
-Assets/SongData
-Assets/SongData.meta
+*SongData
+*ongData.meta
 
 # Materials; just textures
 Assets/Materials*
