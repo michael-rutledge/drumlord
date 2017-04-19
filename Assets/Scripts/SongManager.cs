@@ -148,7 +148,6 @@ public class SongManager : MonoBehaviour {
                 float rollTick = 8.9f * Time.deltaTime / ROLL_TIME;
                 Vector3 oldPos = n.rollNote.transform.localPosition;
                 n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
-                Debug.Log("ote " + n.value);
             }
         }
 
