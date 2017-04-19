@@ -33,3 +33,6 @@ sysinfo.txt
 # Song data; it's just audio
 Assets/SongData
 Assets/SongData.meta
+
+# Materials; just textures
+Assets/Materials*
