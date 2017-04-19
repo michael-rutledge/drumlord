@@ -29,20 +29,33 @@ public class SongManager : MonoBehaviour {
     private int curRollIndex = 0;
     private GameObject roll;
     // Audio stuff
+    public string songName = "thisHeadIHold";
+    public string difficulty = "Expert";
     private AudioSource[] audioSources;
-    private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio;
-    public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager;
+    private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio, tomAudio;
+    public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager, highTomManager,
+        medTomManager, lowTomManager;
 
     // Use this for initialization
     void Start () {
         // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
+        songAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName);
         bassAudio = audioSources[1];
+        bassAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Bass");
         snareAudio = audioSources[2];
+        snareAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Snare");
         hihatAudio = audioSources[3];
+        hihatAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Hihat");
         cymbalAudio = audioSources[4];
-        midi = new MidiFile("Assets/SongData/uptownFunk/uptownFunkExpert.mid");
+        cymbalAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Cymbal");
+        tomAudio = audioSources[5];
+        tomAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Tom");
+        fixNullTracks();
+        // init midi
+        midi = new MidiFile("Assets/Resources/SongData/" + songName + "/" + songName +
+            difficulty + ".mid");
         tempo = null;
         bpm = 1;
         totalNotes = 0;
@@ -127,14 +140,23 @@ public class SongManager : MonoBehaviour {
             }
             else if (isRide(curRollNote))
             {
-                curRollNote.rollNote.transform.Translate(new Vector3(.02f, 0.0f, 0.0f));
+                curRollNote.rollNote.transform.Translate(new Vector3(.06f, 0.0f, 0.0f));
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 1, 1);
             }
-            else
+            else if (isHighTom(curRollNote))
             {
-                curRollNote.rollNote.transform.Translate(new Vector3(.05f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 0.5f, 0, 1);
-                Debug.Log("other note");
+                curRollNote.rollNote.transform.Translate(new Vector3(0.0f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
+            }
+            else if (isMedTom(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(0.02f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 0.5f, 1.0f, 1);
+            }
+            else if (isLowTom(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(0.04f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 0.5f, 1);
             }
             ++curRollIndex;
         }
@@ -174,6 +196,11 @@ public class SongManager : MonoBehaviour {
                 {
                     cymbalAudio.volume = 0.0f;
                 }
+                // toms
+                if (isHighTom(elem) || isMedTom(elem) || isLowTom(elem))
+                {
+                    tomAudio.volume = 0.0f;
+                }
                 DestroyImmediate(elem.rollNote);
                 notesInWindow.RemoveAt(i);
             }
@@ -199,20 +226,29 @@ public class SongManager : MonoBehaviour {
                     notesInWindow.RemoveAt(i);
                 }
                 // crash
-                if (isCrash(elem) &&
+                if ((isCrash(elem) &&
                     (crashManager.rightHit >= windowStart ||
-                    crashManager.leftHit >= windowStart))
+                    crashManager.leftHit >= windowStart)) ||
+                    (isRide(elem) &&
+                    (rideManager.rightHit >= windowStart ||
+                    rideManager.leftHit >= windowStart)))
                 {
                     cymbalAudio.volume = 1.0f;
                     DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
                 }
-                // ride
-                if (isRide(elem) &&
-                    (rideManager.rightHit >= windowStart ||
-                    rideManager.leftHit >= windowStart))
+                // toms
+                if ((isHighTom(elem) &&
+                    (highTomManager.rightHit >= windowStart ||
+                    highTomManager.leftHit >= windowStart)) ||
+                    (isMedTom(elem) &&
+                    (medTomManager.rightHit >= windowStart ||
+                    medTomManager.leftHit >= windowStart)) ||
+                    (isLowTom(elem) &&
+                    (lowTomManager.rightHit >= windowStart ||
+                    lowTomManager.leftHit >= windowStart)))
                 {
-                    cymbalAudio.volume = 1.0f;
+                    tomAudio.volume = 1.0f;
                     DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
                 }
@@ -221,9 +257,13 @@ public class SongManager : MonoBehaviour {
     }
 
     // helper boolean functions to determine what kind of hit it is
+    bool isBass(Note note)
+    {
+        return note.value == "C3";
+    }
     bool isSnare(Note note)
     {
-        return note.value == "D3" || note.value == "E3";
+        return note.value == "D3" || note.value == "E3" || note.value == "A#2";
     }
     bool isHiHat(Note note)
     {
@@ -236,5 +276,47 @@ public class SongManager : MonoBehaviour {
     bool isRide(Note note)
     {
         return note.value == "D#4" || note.value == "F4";
+    }
+    bool isHighTom(Note note)
+    {
+        return note.value == "C4" || note.value == "D4";
+    }
+    bool isMedTom(Note note)
+    {
+        return note.value == "A3" || note.value == "B3";
+    }
+    bool isLowTom(Note note)
+    {
+        return note.value == "F3" || note.value == "G3";
+    }
+
+    // audio helper functions
+    void fixNullTracks()
+    {
+        if (bassAudio.clip == null)
+        {
+            bassAudio.clip = songAudio.clip;
+            bassAudio.volume = 0.0f;
+        }
+        if (snareAudio.clip == null)
+        {
+            snareAudio.clip = songAudio.clip;
+            snareAudio.volume = 0.0f;
+        }
+        if (hihatAudio.clip == null)
+        {
+            hihatAudio.clip = songAudio.clip;
+            hihatAudio.volume = 0.0f;
+        }
+        if (cymbalAudio.clip == null)
+        {
+            cymbalAudio.clip = songAudio.clip;
+            cymbalAudio.volume = 0.0f;
+        }
+        if (tomAudio.clip == null)
+        {
+            tomAudio.clip = songAudio.clip;
+            tomAudio.volume = 0.0f;
+        }
     }
 }
