@@ -29,7 +29,7 @@ public class SongManager : MonoBehaviour {
     private int curRollIndex = 0;
     private GameObject roll;
     // Audio stuff
-    private float startBuffer = 3.5f;
+    private float startBuffer;
     private bool startFlag = false;
     public string songName;
     public string difficulty = "Expert";
@@ -69,8 +69,9 @@ public class SongManager : MonoBehaviour {
                 tempo = (TempoEvent)note;
                 double secondsPerQuarterNote = (double)tempo.MicrosecondsPerQuarterNote / 1000000;
                 bpm = (int)(1 / secondsPerQuarterNote * 60);
+                startBuffer = (float)secondsPerQuarterNote * 8;
                 // use default roll time to find new one
-                ROLL_TIME *= 162.0f / bpm;
+                ROLL_TIME *= (float)secondsPerQuarterNote * 4;
                 Debug.Log("Playing song with bpm " + bpm);
             }
             // for actual note hits, report back information
