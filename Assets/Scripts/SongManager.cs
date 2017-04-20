@@ -9,7 +9,7 @@ public class SongManager : MonoBehaviour {
     private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.07f;
     private const float HIT_WINDOW = 0.1f;
-    private const float ROLL_TIME = 2.4f;
+    private float ROLL_TIME = 1.5f;
     // note representations
     public class Note
     {
@@ -29,7 +29,7 @@ public class SongManager : MonoBehaviour {
     private int curRollIndex = 0;
     private GameObject roll;
     // Audio stuff
-    public string songName = "thisHeadIHold";
+    public string songName;
     public string difficulty = "Expert";
     private AudioSource[] audioSources;
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio, tomAudio;
@@ -67,6 +67,8 @@ public class SongManager : MonoBehaviour {
                 tempo = (TempoEvent)note;
                 double secondsPerQuarterNote = (double)tempo.MicrosecondsPerQuarterNote / 1000000;
                 bpm = (int)(1 / secondsPerQuarterNote * 60);
+                // use default roll time to find new one
+                ROLL_TIME *= 162.0f / bpm;
                 Debug.Log("Playing song with bpm " + bpm);
             }
             // for actual note hits, report back information
@@ -167,7 +169,7 @@ public class SongManager : MonoBehaviour {
 
             if (n.rollNote != null)
             {
-                float rollTick = 8.9f * Time.deltaTime / ROLL_TIME;
+                float rollTick = 9.2f * Time.deltaTime / ROLL_TIME;
                 Vector3 oldPos = n.rollNote.transform.localPosition;
                 n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
             }
@@ -240,14 +242,17 @@ public class SongManager : MonoBehaviour {
                 // toms
                 if ((isHighTom(elem) &&
                     (highTomManager.rightHit >= windowStart ||
-                    highTomManager.leftHit >= windowStart)) ||
+                    highTomManager.leftHit >= windowStart))
+                    ||
                     (isMedTom(elem) &&
                     (medTomManager.rightHit >= windowStart ||
-                    medTomManager.leftHit >= windowStart)) ||
+                    medTomManager.leftHit >= windowStart))
+                    ||
                     (isLowTom(elem) &&
                     (lowTomManager.rightHit >= windowStart ||
                     lowTomManager.leftHit >= windowStart)))
                 {
+                    Debug.Log("TOM HIT");
                     tomAudio.volume = 1.0f;
                     DestroyImmediate(elem.rollNote);
                     notesInWindow.RemoveAt(i);
