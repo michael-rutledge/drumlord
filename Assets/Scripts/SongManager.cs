@@ -24,11 +24,13 @@ public class SongManager : MonoBehaviour {
     private List<Note> notesInWindow = new List<Note>();
     public int bpm;
     public int totalNotes;
-    private float realStartTime;
+    private float realStartTime = 100.0f;
     private int curIndex = 0;
     private int curRollIndex = 0;
     private GameObject roll;
     // Audio stuff
+    private float startBuffer = 3.5f;
+    private bool startFlag = false;
     public string songName;
     public string difficulty = "Expert";
     private AudioSource[] audioSources;
@@ -80,19 +82,13 @@ public class SongManager : MonoBehaviour {
                 float realTime = quarterNoteOn * 60 / bpm;
                 Note noteToAdd = new global::SongManager.Note();
                 noteToAdd.value = tempNote.NoteName;
-                noteToAdd.timestamp = realTime;
+                noteToAdd.timestamp = realTime + startBuffer;
                 noteToAdd.rollNote = null;
                 notes.Add(noteToAdd);
             }
         }
         Debug.Log("Total drum hits in song: " + totalNotes);
         realStartTime = Time.fixedTime + AUDIO_DELAY;
-        // play all tracks
-        songAudio.Play();
-        bassAudio.Play();
-        snareAudio.Play();
-        hihatAudio.Play();
-        cymbalAudio.Play();
         // get roll sheet
         roll = GameObject.Find("Roll");
     }
@@ -101,6 +97,17 @@ public class SongManager : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         float curTime = Time.fixedTime - realStartTime;
+        // take care of buffer at start
+        if (!startFlag && curTime >= startBuffer)
+        {
+            // play all tracks
+            songAudio.Play();
+            bassAudio.Play();
+            snareAudio.Play();
+            hihatAudio.Play();
+            cymbalAudio.Play();
+            startFlag = true;
+        }
         Note curNote;
         // for every note that is currently active, do something
         while (curIndex < notes.Count
@@ -201,7 +208,7 @@ public class SongManager : MonoBehaviour {
                 // toms
                 if (isHighTom(elem) || isMedTom(elem) || isLowTom(elem))
                 {
-                    tomAudio.volume = 0.0f;
+                    tomAudio.volume = 1.0f;
                 }
                 DestroyImmediate(elem.rollNote);
                 notesInWindow.RemoveAt(i);
