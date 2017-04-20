@@ -178,7 +178,7 @@ public class SongManager : MonoBehaviour {
 
             if (n.rollNote != null)
             {
-                float rollTick = 9.2f * Time.deltaTime / ROLL_TIME;
+                float rollTick = 10.0f * Time.deltaTime / ROLL_TIME;
                 Vector3 oldPos = n.rollNote.transform.localPosition;
                 n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
             }
