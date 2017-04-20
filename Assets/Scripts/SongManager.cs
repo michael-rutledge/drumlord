@@ -106,6 +106,7 @@ public class SongManager : MonoBehaviour {
             snareAudio.Play();
             hihatAudio.Play();
             cymbalAudio.Play();
+            tomAudio.Play();
             startFlag = true;
         }
         Note curNote;
@@ -208,7 +209,7 @@ public class SongManager : MonoBehaviour {
                 // toms
                 if (isHighTom(elem) || isMedTom(elem) || isLowTom(elem))
                 {
-                    tomAudio.volume = 1.0f;
+                    tomAudio.volume = 0.0f;
                 }
                 DestroyImmediate(elem.rollNote);
                 notesInWindow.RemoveAt(i);
