@@ -6,6 +6,8 @@ using NAudio.Midi;
 
 public class SongManager : MonoBehaviour {
 
+
+    // constants
     private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.07f;
     private const float HIT_WINDOW = 0.1f;
@@ -17,11 +19,14 @@ public class SongManager : MonoBehaviour {
         public float timestamp;    // moment in realtime when note is hit (in seconds)
         public GameObject rollNote;// 3d object representation of note
     };
+    private List<GameObject> beatTicks = new List<GameObject>();
     // MIDI stuff
     public MidiFile midi;
     public TempoEvent tempo;
     public List<Note> notes = new List<Note>();
     private List<Note> notesInWindow = new List<Note>();
+    private float secondsPerQuarterNote;
+    private int numTicks = 0;
     public int bpm;
     public int totalNotes;
     private float realStartTime = 100.0f;
@@ -37,6 +42,7 @@ public class SongManager : MonoBehaviour {
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio, tomAudio;
     public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager, highTomManager,
         medTomManager, lowTomManager;
+
 
     // Use this for initialization
     void Start () {
@@ -67,11 +73,11 @@ public class SongManager : MonoBehaviour {
             if (note is NAudio.Midi.TempoEvent)
             {
                 tempo = (TempoEvent)note;
-                double secondsPerQuarterNote = (double)tempo.MicrosecondsPerQuarterNote / 1000000;
+                secondsPerQuarterNote = (float)tempo.MicrosecondsPerQuarterNote / 1000000;
                 bpm = (int)(1 / secondsPerQuarterNote * 60);
-                startBuffer = (float)secondsPerQuarterNote * 8;
+                startBuffer = secondsPerQuarterNote * 8;
                 // use default roll time to find new one
-                ROLL_TIME *= (float)secondsPerQuarterNote * 4;
+                ROLL_TIME *= secondsPerQuarterNote * 4;
                 Debug.Log("Playing song with bpm " + bpm);
             }
             // for actual note hits, report back information
@@ -122,7 +128,7 @@ public class SongManager : MonoBehaviour {
             // add note to notes currently in hit window
             notesInWindow.Add(curNote);
         }
-
+        updateBeatTicks(curTime);
         // spawn roll notes
         Note curRollNote;
         while (curRollIndex < notes.Count
@@ -169,6 +175,10 @@ public class SongManager : MonoBehaviour {
                 curRollNote.rollNote.transform.Translate(new Vector3(0.04f, 0.0f, 0.0f));
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 0.5f, 1);
             }
+            else if (isBass((curRollNote))) {
+                curRollNote.rollNote.transform.localScale = new Vector3(10.0f, 0.08f, 0.1f);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.67f, 0.0f, 1);
+            }
             ++curRollIndex;
         }
         // move roll notes
@@ -178,9 +188,9 @@ public class SongManager : MonoBehaviour {
 
             if (n.rollNote != null)
             {
-                float rollTick = 10.0f * Time.deltaTime / ROLL_TIME;
+                float rollTick = 9.96f * (curTime - n.timestamp) / ROLL_TIME + 4.98f;
                 Vector3 oldPos = n.rollNote.transform.localPosition;
-                n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
+                n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, -rollTick);
             }
         }
 
@@ -270,6 +280,7 @@ public class SongManager : MonoBehaviour {
         }
     }
 
+
     // helper boolean functions to determine what kind of hit it is
     bool isBass(Note note)
     {
@@ -304,7 +315,31 @@ public class SongManager : MonoBehaviour {
         return note.value == "F3" || note.value == "G3";
     }
 
+
     // audio helper functions
+    void updateBeatTicks(float curTime)
+    {
+        // spawn beat ticks on every quarter note
+        if (curTime > numTicks * secondsPerQuarterNote)
+        {
+            beatTicks.Add((GameObject)Instantiate(Resources.Load("BeatTick")));
+            beatTicks.ElementAt(beatTicks.Count-1).transform.SetParent(roll.transform, false);
+            numTicks++;
+        }
+        // move beat ticks
+        for (int i = 0; i < beatTicks.Count; i++)
+        {
+            float rollTick = 10.0f * Time.deltaTime / ROLL_TIME;
+            Vector3 oldPos = beatTicks.ElementAt(i).transform.localPosition;
+            beatTicks.ElementAt(i).transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
+            // delete beat tick if under the roll
+            if (beatTicks.ElementAt(i).transform.localPosition.z < -5.0f)
+            {
+                DestroyImmediate(beatTicks.ElementAt(i));
+                beatTicks.RemoveAt(i);
+            }
+        }
+    }
     void fixNullTracks()
     {
         if (bassAudio.clip == null)
