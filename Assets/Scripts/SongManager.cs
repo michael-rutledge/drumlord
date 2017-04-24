@@ -33,6 +33,13 @@ public class SongManager : MonoBehaviour {
     private int curIndex = 0;
     private int curRollIndex = 0;
     private GameObject roll;
+    //multiplier stuff
+    private int streak = 0;
+    private int multiplier = 0;
+    private int score = 0;
+    public GameObject multiplierText;
+    public GameObject streakText;
+    public GameObject scoreText;
     // Audio stuff
     private float startBuffer;
     private bool startFlag = false;
@@ -202,6 +209,9 @@ public class SongManager : MonoBehaviour {
             // note missed
             if (curTime - elem.timestamp > HIT_WINDOW / 2)
             {
+                streak = 0;
+                multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
+                streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
                 // snare
                 if (isSnare(elem))
                 {
@@ -233,20 +243,16 @@ public class SongManager : MonoBehaviour {
                     (snareManager.rightHit >= windowStart ||
                     snareManager.leftHit >= windowStart))
                 {
-                    snareAudio.volume = 1.0f;
-                    DestroyImmediate(elem.rollNote);
-                    notesInWindow.RemoveAt(i);
+                    hitDrum(snareAudio, elem, i);
                 }
                 // hihat
                 if (isHiHat(elem) &&
                     (hihatManager.rightHit >= windowStart ||
                     hihatManager.leftHit >= windowStart))
                 {
-                    hihatAudio.volume = 1.0f;
-                    DestroyImmediate(elem.rollNote);
-                    notesInWindow.RemoveAt(i);
+                    hitDrum(hihatAudio, elem, i);
                 }
-                // crash
+                // cymbals
                 if ((isCrash(elem) &&
                     (crashManager.rightHit >= windowStart ||
                     crashManager.leftHit >= windowStart)) ||
@@ -254,9 +260,7 @@ public class SongManager : MonoBehaviour {
                     (rideManager.rightHit >= windowStart ||
                     rideManager.leftHit >= windowStart)))
                 {
-                    cymbalAudio.volume = 1.0f;
-                    DestroyImmediate(elem.rollNote);
-                    notesInWindow.RemoveAt(i);
+                    hitDrum(cymbalAudio, elem, i);
                 }
                 // toms
                 if ((isHighTom(elem) &&
@@ -271,10 +275,12 @@ public class SongManager : MonoBehaviour {
                     (lowTomManager.rightHit >= windowStart ||
                     lowTomManager.leftHit >= windowStart)))
                 {
-                    Debug.Log("TOM HIT");
-                    tomAudio.volume = 1.0f;
-                    DestroyImmediate(elem.rollNote);
-                    notesInWindow.RemoveAt(i);
+                    hitDrum(tomAudio, elem, i);
+                }
+                //TODO bass checking
+                else if (isBass(elem))
+                {
+                    hitDrum(bassAudio, elem, i);
                 }
             }
         }
@@ -346,6 +352,22 @@ public class SongManager : MonoBehaviour {
             }
         }
     }
+    void hitDrum(AudioSource source, Note elem, int i)
+    {
+        // deal with audio
+        source.volume = 1.0f;
+        DestroyImmediate(elem.rollNote);
+        notesInWindow.RemoveAt(i);
+        // deal with score
+        streak++;
+        multiplier = streak / 10 + 1;
+        multiplier = (multiplier > 5) ? 5 : multiplier;
+        if (streak > 0)
+            score += multiplier * 10;
+        multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
+        streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
+        scoreText.GetComponent<TextMesh>().text = "Score: " + score;
+    }
     void fixNullTracks()
     {
         if (bassAudio.clip == null)
@@ -374,4 +396,6 @@ public class SongManager : MonoBehaviour {
             tomAudio.volume = 0.0f;
         }
     }
+    
+
 }
