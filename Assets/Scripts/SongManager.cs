@@ -176,7 +176,7 @@ public class SongManager : MonoBehaviour {
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 0.5f, 1);
             }
             else if (isBass((curRollNote))) {
-                curRollNote.rollNote.transform.localScale = new Vector3(10.0f, 0.08f, 0.1f);
+                curRollNote.rollNote.transform.localScale = new Vector3(10.0f, 0.15f, 0.1f);
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.67f, 0.0f, 1);
             }
             ++curRollIndex;
@@ -324,12 +324,18 @@ public class SongManager : MonoBehaviour {
         {
             beatTicks.Add((GameObject)Instantiate(Resources.Load("BeatTick")));
             beatTicks.ElementAt(beatTicks.Count-1).transform.SetParent(roll.transform, false);
+            // every other beattick is bigger
+            if (numTicks % 2 != 0)
+            {
+                beatTicks.ElementAt(beatTicks.Count - 1).transform.localScale =
+                    new Vector3(1.0f, 0.016f, 0.004f);
+            }
             numTicks++;
         }
         // move beat ticks
         for (int i = 0; i < beatTicks.Count; i++)
         {
-            float rollTick = 10.0f * Time.deltaTime / ROLL_TIME;
+            float rollTick = 9.96f * Time.deltaTime / ROLL_TIME;
             Vector3 oldPos = beatTicks.ElementAt(i).transform.localPosition;
             beatTicks.ElementAt(i).transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
             // delete beat tick if under the roll
