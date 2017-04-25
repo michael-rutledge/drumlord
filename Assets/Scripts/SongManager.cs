@@ -15,9 +15,10 @@ public class SongManager : MonoBehaviour {
     // note representations
     public class Note
     {
-        public string value;       // what note is it; i.e. C#3, F3, E4, etc
-        public float timestamp;    // moment in realtime when note is hit (in seconds)
-        public GameObject rollNote;// 3d object representation of note
+        public string value;                    // what note is it; i.e. C#3, F3, E4, etc
+        public float timestamp;                 // moment in realtime when note is hit (in seconds)
+        public GameObject rollNote;             // 3d object representation of note
+        public GameObject hitParticles;         // particle system for hits
     };
     private List<GameObject> beatTicks = new List<GameObject>();
     // MIDI stuff
@@ -25,6 +26,7 @@ public class SongManager : MonoBehaviour {
     public TempoEvent tempo;
     public List<Note> notes = new List<Note>();
     private List<Note> notesInWindow = new List<Note>();
+    private List<GameObject> particlesOut = new List<GameObject>();
     private float secondsPerQuarterNote;
     private int numTicks = 0;
     public int bpm;
@@ -354,6 +356,23 @@ public class SongManager : MonoBehaviour {
     }
     void hitDrum(AudioSource source, Note elem, int i)
     {
+        // particle effects
+        elem.hitParticles = (GameObject)Instantiate(Resources.Load("NoteHitParticles"));
+        ParticleSystem ps = elem.hitParticles.GetComponent<ParticleSystem>();
+        elem.hitParticles.transform.SetParent(roll.transform, false);
+        elem.hitParticles.transform.localPosition = elem.rollNote.transform.localPosition;
+        ps.startColor = elem.rollNote.GetComponent<MeshRenderer>().material.color;
+        particlesOut.Add(elem.hitParticles);
+        ps.Play();
+        // get rid of dead particles
+        for (int idx = 0; idx < particlesOut.Count; idx++)
+        {
+            if (!particlesOut.ElementAt(idx).GetComponent<ParticleSystem>().IsAlive())
+            {
+                DestroyImmediate(particlesOut.ElementAt(idx));
+                particlesOut.RemoveAt(idx);
+            }
+        }
         // deal with audio
         source.volume = 1.0f;
         DestroyImmediate(elem.rollNote);

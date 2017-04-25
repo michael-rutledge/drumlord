@@ -22,10 +22,30 @@ public class DrumTriggerManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        // stick information initialized
         rightHit = leftHit = -1.0;
         startTime = Time.fixedTime + AUDIO_DELAY;
         oldRightPos = stickRightHead.transform.position;
         oldLeftPos = stickLeftHead.transform.position;
+        // set color of drums based on type
+        switch (this.name)
+        {
+            case "SnareDrum":
+                this.GetComponent<MeshRenderer>().material.color = new Color(1, .75f, .75f, 1);
+                break;
+            case "HiHat":
+                this.GetComponent<MeshRenderer>().material.color = new Color(.99f, .99f, .59f, 1);
+                break;
+            case "Crash":
+                this.GetComponent<MeshRenderer>().material.color = new Color(.47f, .87f, .47f, 1);
+                break;
+            case "Ride":
+                this.GetComponent<MeshRenderer>().material.color = new Color(.63f, .77f, 1, 1);
+                break;
+            case "HighTom":
+                this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
+                break;
+        }
     }
 	
 	// Update is called once per frame
@@ -71,9 +91,5 @@ public class DrumTriggerManager : MonoBehaviour {
     {
 
     }
-
-    void OnGUI() {
-        GUI.Label( new Rect(450, 100, 100, 100),
-            ("" + rightHit) );
-    }
+    
 }
