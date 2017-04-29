@@ -9,8 +9,8 @@ public class SongManager : MonoBehaviour {
 
     // constants
     private const float EPSILON = 0.022f;
-    private const float AUDIO_DELAY = 0.07f;
-    private const float HIT_WINDOW = 0.1f;
+    private const float AUDIO_DELAY = 0.1f;
+    private const float HIT_WINDOW = 0.16f;
     private float ROLL_TIME = 1.5f;
     // note representations
     public class Note
@@ -31,7 +31,7 @@ public class SongManager : MonoBehaviour {
     private int numTicks = 0;
     public int bpm;
     public int totalNotes;
-    private float realStartTime = 100.0f;
+    public float realStartTime = 100.0f;
     private int curIndex = 0;
     private int curRollIndex = 0;
     private GameObject roll;
@@ -44,6 +44,7 @@ public class SongManager : MonoBehaviour {
     public GameObject scoreText;
     // Audio stuff
     private float startBuffer;
+    public float curTime;
     private bool startFlag = false;
     public string songName;
     public string difficulty = "Expert";
@@ -112,7 +113,7 @@ public class SongManager : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        float curTime = Time.fixedTime - realStartTime;
+        curTime = Time.fixedTime - realStartTime;
         // take care of buffer at start
         if (!startFlag && curTime >= startBuffer)
         {
@@ -137,7 +138,7 @@ public class SongManager : MonoBehaviour {
             // add note to notes currently in hit window
             notesInWindow.Add(curNote);
         }
-        updateBeatTicks(curTime);
+        updateBeatTicks();
         // spawn roll notes
         Note curRollNote;
         while (curRollIndex < notes.Count
@@ -149,15 +150,15 @@ public class SongManager : MonoBehaviour {
             curRollNote.rollNote = (GameObject)Instantiate(Resources.Load("RollNote"));
             curRollNote.rollNote.transform.SetParent(roll.transform, false);
             // move the notes horizontally based upon their 
-            if (isSnare(curRollNote))
-            {
-                curRollNote.rollNote.transform.Translate(new Vector3(-.05f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 0, 0, 1);
-            }
-            else if (isHiHat(curRollNote))
+            if (isHiHat(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(-.02f, 0.0f, 0.0f));
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 1, 0, 1);
+            }
+            else if (isSnare(curRollNote))
+            {
+                curRollNote.rollNote.transform.Translate(new Vector3(-.05f, 0.0f, 0.0f));
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 0, 0, 1);
             }
             else if (isCrash(curRollNote))
             {
@@ -214,15 +215,15 @@ public class SongManager : MonoBehaviour {
                 streak = 0;
                 multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
                 streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
-                // snare
-                if (isSnare(elem))
-                {
-                    snareAudio.volume = 0.0f;
-                }
                 // hihat
                 if (isHiHat(elem))
                 {
                     hihatAudio.volume = 0.0f;
+                }
+                // snare
+                if (isSnare(elem))
+                {
+                    snareAudio.volume = 0.0f;
                 }
                 // crash and ride
                 if (isCrash(elem) || isRide(elem))
@@ -240,49 +241,56 @@ public class SongManager : MonoBehaviour {
             // note hit
             else
             {
-                // snare
-                if (isSnare(elem) &&
-                    (snareManager.rightHit >= windowStart ||
-                    snareManager.leftHit >= windowStart))
-                {
-                    hitDrum(snareAudio, elem, i);
-                }
                 // hihat
                 if (isHiHat(elem) &&
                     (hihatManager.rightHit >= windowStart ||
                     hihatManager.leftHit >= windowStart))
                 {
-                    hitDrum(hihatAudio, elem, i);
+                    hitDrum(hihatManager, hihatAudio, elem, i);
+                }
+                // snare
+                if (isSnare(elem) &&
+                    (snareManager.rightHit >= windowStart ||
+                    snareManager.leftHit >= windowStart))
+                {
+                    hitDrum(snareManager, snareAudio, elem, i);
                 }
                 // cymbals
-                if ((isCrash(elem) &&
+                if (isCrash(elem) &&
                     (crashManager.rightHit >= windowStart ||
-                    crashManager.leftHit >= windowStart)) ||
-                    (isRide(elem) &&
-                    (rideManager.rightHit >= windowStart ||
-                    rideManager.leftHit >= windowStart)))
+                    crashManager.leftHit >= windowStart))
                 {
-                    hitDrum(cymbalAudio, elem, i);
+                    hitDrum(crashManager, cymbalAudio, elem, i);
+                }
+                if (isRide(elem) &&
+                    (rideManager.rightHit >= windowStart ||
+                    rideManager.leftHit >= windowStart))
+                {
+                    hitDrum(rideManager, cymbalAudio, elem, i);
                 }
                 // toms
                 if ((isHighTom(elem) &&
                     (highTomManager.rightHit >= windowStart ||
-                    highTomManager.leftHit >= windowStart))
-                    ||
-                    (isMedTom(elem) &&
+                    highTomManager.leftHit >= windowStart)))
+                {
+                    hitDrum(highTomManager, tomAudio, elem, i);
+                }
+                if (isMedTom(elem) &&
                     (medTomManager.rightHit >= windowStart ||
                     medTomManager.leftHit >= windowStart))
-                    ||
-                    (isLowTom(elem) &&
-                    (lowTomManager.rightHit >= windowStart ||
-                    lowTomManager.leftHit >= windowStart)))
                 {
-                    hitDrum(tomAudio, elem, i);
+                    hitDrum(medTomManager, tomAudio, elem, i);
+                }
+                if (isLowTom(elem) &&
+                    (lowTomManager.rightHit >= windowStart ||
+                    lowTomManager.leftHit >= windowStart))
+                {
+                    hitDrum(lowTomManager, tomAudio, elem, i);
                 }
                 //TODO bass checking
                 else if (isBass(elem))
                 {
-                    hitDrum(bassAudio, elem, i);
+                    hitDrum(null, bassAudio, elem, i);
                 }
             }
         }
@@ -325,7 +333,7 @@ public class SongManager : MonoBehaviour {
 
 
     // audio helper functions
-    void updateBeatTicks(float curTime)
+    void updateBeatTicks()
     {
         // spawn beat ticks on every quarter note
         if (curTime > numTicks * secondsPerQuarterNote)
@@ -354,7 +362,7 @@ public class SongManager : MonoBehaviour {
             }
         }
     }
-    void hitDrum(AudioSource source, Note elem, int i)
+    void hitDrum(DrumTriggerManager dm, AudioSource source, Note elem, int i)
     {
         // particle effects
         if (isBass(elem))
@@ -394,6 +402,12 @@ public class SongManager : MonoBehaviour {
                 DestroyImmediate(particlesOut.ElementAt(idx));
                 particlesOut.RemoveAt(idx);
             }
+        }
+        // deal with controller logic to avoid double hits
+        if (dm != null)
+        {
+            dm.rightHit = 0.0f;
+            dm.leftHit = 0.0f;
         }
         // deal with audio
         source.volume = 1.0f;

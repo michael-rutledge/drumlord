@@ -10,10 +10,9 @@ public class DrumTriggerManager : MonoBehaviour {
     public SteamVR_TrackedObject leftHand;
     private SteamVR_Controller.Device leftDevice;
     // Time data
+    public SongManager songManager;
     public double rightHit;
     public double leftHit;
-    public double startTime;
-    private const float AUDIO_DELAY = 0.0f;
     // Position data
     public GameObject stickRightHead;
     public GameObject stickLeftHead;
@@ -24,7 +23,6 @@ public class DrumTriggerManager : MonoBehaviour {
     void Start () {
         // stick information initialized
         rightHit = leftHit = -1.0;
-        startTime = Time.fixedTime + AUDIO_DELAY;
         oldRightPos = stickRightHead.transform.position;
         oldLeftPos = stickLeftHead.transform.position;
         // set color of drums based on type
@@ -68,7 +66,7 @@ public class DrumTriggerManager : MonoBehaviour {
             float angM = rightDevice.angularVelocity.magnitude;
             float tranM = rightDevice.velocity.magnitude;
             float velM = angM + tranM;
-            rightHit = curTime - startTime;
+            rightHit = songManager.curTime;
             Debug.Log(this.name + " collision with " + other.gameObject.name +
                 " with velocity " + velM + " at time " + rightHit);
         }
@@ -80,7 +78,7 @@ public class DrumTriggerManager : MonoBehaviour {
             float angM = leftDevice.angularVelocity.magnitude;
             float tranM = leftDevice.velocity.magnitude;
             float velM = angM + tranM;
-            leftHit = curTime - startTime;
+            leftHit = songManager.curTime;
             Debug.Log(this.name + " collision with " + other.gameObject.name +
                 " with velocity " + velM + " at time " + leftHit);
         }
