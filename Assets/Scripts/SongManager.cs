@@ -11,6 +11,8 @@ public class SongManager : MonoBehaviour {
     private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.1f;
     private const float HIT_WINDOW = 0.16f;
+    private const string PREFAB_DIR = "Prefabs/";
+    private const string SONG_DIR = "SongData/";
     private float ROLL_TIME = 1.5f;
     // note representations
     public class Note
@@ -59,17 +61,17 @@ public class SongManager : MonoBehaviour {
         // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
-        songAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName);
+        songAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName);
         bassAudio = audioSources[1];
-        bassAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Bass");
+        bassAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Bass");
         snareAudio = audioSources[2];
-        snareAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Snare");
+        snareAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Snare");
         hihatAudio = audioSources[3];
-        hihatAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Hihat");
+        hihatAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Hihat");
         cymbalAudio = audioSources[4];
-        cymbalAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Cymbal");
+        cymbalAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Cymbal");
         tomAudio = audioSources[5];
-        tomAudio.clip = (AudioClip)Resources.Load("SongData/" + songName + "/" + songName + "Tom");
+        tomAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Tom");
         fixNullTracks();
         // init midi
         midi = new MidiFile("Assets/Resources/SongData/" + songName + "/" + songName +
@@ -147,7 +149,7 @@ public class SongManager : MonoBehaviour {
             curRollNote = notes.ElementAt(curRollIndex);
             // make a clone of RollNote prefab then make its parent the roll
             // this allows for relative transforms making it easy to move the notes
-            curRollNote.rollNote = (GameObject)Instantiate(Resources.Load("RollNote"));
+            curRollNote.rollNote = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "RollNote"));
             curRollNote.rollNote.transform.SetParent(roll.transform, false);
             // move the notes horizontally based upon their 
             if (isHiHat(curRollNote))
@@ -338,7 +340,7 @@ public class SongManager : MonoBehaviour {
         // spawn beat ticks on every quarter note
         if (curTime > numTicks * secondsPerQuarterNote)
         {
-            beatTicks.Add((GameObject)Instantiate(Resources.Load("BeatTick")));
+            beatTicks.Add((GameObject)Instantiate(Resources.Load(PREFAB_DIR + "BeatTick")));
             beatTicks.ElementAt(beatTicks.Count-1).transform.SetParent(roll.transform, false);
             // every other beattick is bigger
             if (numTicks % 2 != 0)
@@ -367,7 +369,7 @@ public class SongManager : MonoBehaviour {
         // particle effects
         if (isBass(elem))
         {
-            elem.hitParticles = (GameObject)Instantiate(Resources.Load("BassHitParticles"));
+            elem.hitParticles = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "BassHitParticles"));
             ParticleSystem ps = elem.hitParticles.GetComponent<ParticleSystem>();
             elem.hitParticles.transform.SetParent(roll.transform, false);
             elem.hitParticles.transform.localPosition = elem.rollNote.transform.localPosition;
@@ -375,7 +377,7 @@ public class SongManager : MonoBehaviour {
             particlesOut.Add(elem.hitParticles);
             ps.Play();
 
-            elem.hitParticles = (GameObject)Instantiate(Resources.Load("BassHitParticles"));
+            elem.hitParticles = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "BassHitParticles"));
             ParticleSystem ps2 = elem.hitParticles.GetComponent<ParticleSystem>();
             elem.hitParticles.transform.SetParent(roll.transform, false);
             elem.hitParticles.transform.Rotate(0, -180, 0);
@@ -386,7 +388,7 @@ public class SongManager : MonoBehaviour {
         }
         else
         {
-            elem.hitParticles = (GameObject)Instantiate(Resources.Load("NoteHitParticles"));
+            elem.hitParticles = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "NoteHitParticles"));
             ParticleSystem ps = elem.hitParticles.GetComponent<ParticleSystem>();
             elem.hitParticles.transform.SetParent(roll.transform, false);
             elem.hitParticles.transform.localPosition = elem.rollNote.transform.localPosition;
