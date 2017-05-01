@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SongMenuManager : MonoBehaviour {
 
@@ -49,6 +50,8 @@ public class SongMenuManager : MonoBehaviour {
 
     public void showMetaData(string name)
     {
+        // set selected song for play
+        ApplicationModel.selectedSongId = name;
         // create albumArt and destroy if already there
         if (albumArt != null)
             DestroyImmediate(albumArt);
@@ -91,5 +94,13 @@ public class SongMenuManager : MonoBehaviour {
             description += line + "\n";
         }
         songDescription.GetComponent<Text>().text = description;
+    }
+
+
+    // play button function
+    public void playSong()
+    {
+        if (ApplicationModel.selectedSongId != null)
+            SceneManager.LoadScene("basicMotionTest");
     }
 }

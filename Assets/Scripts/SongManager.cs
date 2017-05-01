@@ -48,7 +48,7 @@ public class SongManager : MonoBehaviour {
     private float startBuffer;
     public float curTime;
     private bool startFlag = false;
-    public string songName;
+    private string songName;
     public string difficulty = "Expert";
     private AudioSource[] audioSources;
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio, tomAudio;
@@ -58,6 +58,8 @@ public class SongManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        // pass selected song id from menu
+        songName = ApplicationModel.selectedSongId;
         // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
