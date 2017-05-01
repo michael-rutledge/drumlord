@@ -37,6 +37,16 @@ public class SongMenuManager : MonoBehaviour {
             buttonHeight += BUTTON_OFFSET;
             button.name = curId;
             button.GetComponentInChildren<Text>().text = button.name;
+            // check for info file
+            try {
+                System.IO.StreamReader infoFile =
+                    new System.IO.StreamReader(songDataDir + button.name + "/" + button.name + "Info.txt");
+                button.GetComponentInChildren<Text>().text = infoFile.ReadLine();
+            }
+            catch {
+                Debug.Log("File not found for button naming");
+                return;
+            }
             // give it the actions
             button.GetComponent<Button>().onClick.AddListener(() => showMetaData(curId));
             // add it to the list
@@ -79,7 +89,7 @@ public class SongMenuManager : MonoBehaviour {
         }
         catch
         {
-            Debug.Log("File not found");
+            Debug.Log("File not found for track metadata");
             return;
         }
         // create songNameText and destroy if already there
