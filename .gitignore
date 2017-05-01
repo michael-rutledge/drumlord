@@ -33,6 +33,8 @@ sysinfo.txt
 # Song data; it's just audio
 *SongData
 *ongData.meta
+StreamingAssets
+StreamingAssets.meta
 
 # Materials; just textures
 Assets/Materials*
