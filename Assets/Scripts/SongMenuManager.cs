@@ -11,10 +11,12 @@ public class SongMenuManager : MonoBehaviour {
     // meta data stuff
     private string[] songDataFiles;
     private string[] songDataIds;
-    private string songDataDir = "Assets/Resources/SongData";
+    private string songDataDir = "Assets/Resources/SongData/";
     // button game object stuff
     private float buttonHeight = 0;
     private List<GameObject> songButtons = new List<GameObject>();
+    // track description stuff
+    private GameObject albumArt = null, songNameText = null, songDescription = null;
 
 	// Use this for initialization
 	void Start () {
@@ -24,17 +26,19 @@ public class SongMenuManager : MonoBehaviour {
         for (int i = 0; i < songDataIds.Length; i++)
         {
             // take the absolute path off of the ids
-            songDataIds[i] = songDataIds[i].Substring(songDataDir.Length+1);
-            // make the button and put in the scroll view
+            songDataIds[i] = songDataIds[i].Substring(songDataDir.Length);
+            string curId = songDataIds[i];
+            // instantiate the button and put in the scroll view
             GameObject button = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "ScrollViewButton"));
             button.transform.SetParent(GameObject.Find("SongButtons").transform, false);
             Vector3 oldPos = button.transform.localPosition;
             button.transform.localPosition = new Vector3(oldPos.x, oldPos.y - buttonHeight, oldPos.z);
             // edit the button's text and name
             buttonHeight += BUTTON_OFFSET;
-            button.name = songDataIds[i];
+            button.name = curId;
             button.GetComponentInChildren<Text>().text = button.name;
             // give it the actions
+            button.GetComponent<Button>().onClick.AddListener(() => buttonClick(curId));
             // add it to the list
             songButtons.Add(button);
         }
@@ -45,9 +49,28 @@ public class SongMenuManager : MonoBehaviour {
 		
 	}
 
-    public void fuckItUp()
+    public void buttonClick(string name)
     {
-        string yeah = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name;
-        Debug.Log(yeah);
+        // create albumArt and destroy if already there
+        if (albumArt != null)
+            DestroyImmediate(albumArt);
+        albumArt = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "AlbumArt"));
+        albumArt.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
+        // use custom art if given within songData
+        if (Resources.Load(songDataDir + name + "Art") != null)
+        {
+            albumArt.GetComponent<Image>().sprite = (Sprite)Resources.Load(songDataDir + name + "Art");
+        }
+        // create songNameText and destroy if already there
+        if (songNameText != null)
+            DestroyImmediate(songNameText);
+        songNameText = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "SongNameText"));
+        songNameText.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
+        // create songDescription and destroy if already there
+        if (songDescription != null)
+            DestroyImmediate(songDescription);
+        songDescription = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "SongDescription"));
+        songDescription.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
+        Debug.Log(name);
     }
 }
