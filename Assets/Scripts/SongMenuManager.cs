@@ -15,6 +15,7 @@ public class SongMenuManager : MonoBehaviour {
     // button game object stuff
     private float buttonHeight = 0;
     private List<GameObject> songButtons = new List<GameObject>();
+    public GameObject playButton;
     // track description stuff
     private GameObject albumArt = null, songNameText = null, songDescription = null;
 
@@ -45,7 +46,14 @@ public class SongMenuManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (ApplicationModel.selectedSongId == null)
+        {
+            playButton.GetComponent<Button>().interactable = false;
+        }
+        else
+        {
+            playButton.GetComponent<Button>().interactable = true;
+        }
 	}
 
     public void showMetaData(string name)
