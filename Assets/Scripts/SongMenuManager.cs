@@ -11,7 +11,7 @@ public class SongMenuManager : MonoBehaviour {
     private const float BUTTON_OFFSET = 40;
     // meta data stuff
     private string[] songDataIds;
-    private string songDataDir = "Assets/Resources/SongData/";
+    private string midiDataDir;
     // button game object stuff
     private float buttonHeight = 0;
     private List<GameObject> songButtons = new List<GameObject>();
@@ -22,11 +22,13 @@ public class SongMenuManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         // get string arrays for the song data
-        songDataIds = System.IO.Directory.GetDirectories(songDataDir);
+        midiDataDir = Application.streamingAssetsPath;
+        songDataIds = System.IO.Directory.GetFiles(midiDataDir, "*.mid");
         for (int i = 0; i < songDataIds.Length; i++)
         {
             // take the absolute path off of the ids
-            songDataIds[i] = songDataIds[i].Substring(songDataDir.Length);
+            songDataIds[i] = System.IO.Path.GetFileName(songDataIds[i]);
+            songDataIds[i] = songDataIds[i].Substring(0, songDataIds[i].Length - 10);
             string curId = songDataIds[i];
             // instantiate the button and put in the scroll view
             GameObject button = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "ScrollViewButton"));
@@ -37,20 +39,20 @@ public class SongMenuManager : MonoBehaviour {
             buttonHeight += BUTTON_OFFSET;
             button.name = curId;
             button.GetComponentInChildren<Text>().text = button.name;
-            // check for info file
-            try {
-                System.IO.StreamReader infoFile =
-                    new System.IO.StreamReader(songDataDir + button.name + "/" + button.name + "Info.txt");
-                button.GetComponentInChildren<Text>().text = infoFile.ReadLine();
-            }
-            catch {
-                Debug.Log("File not found for button naming");
-                return;
+            // check for info file and change the title to grammatically correct form
+            TextAsset infoFile = (TextAsset)Resources.Load("SongData/" + button.name + "/"
+                + button.name + "Info");
+            string[] lines = null;
+            if (infoFile != null)
+            {
+                lines = infoFile.text.Split('\n');
+                button.GetComponentInChildren<Text>().text = lines[0];
             }
             // give it the actions
             button.GetComponent<Button>().onClick.AddListener(() => showMetaData(curId));
             // add it to the list
             songButtons.Add(button);
+            Debug.Log(curId);
         }
 	}
 	
@@ -78,21 +80,15 @@ public class SongMenuManager : MonoBehaviour {
         // use custom art if given within songData
         if (Resources.Load<Sprite>("SongData/" + name + "/"  + name + "Art") != null)
         {
-            Debug.Log("SPRITE CHANGE");
             albumArt.GetComponent<Image>().sprite =
                 Resources.Load<Sprite>("SongData/" + name + "/" + name + "Art");
         }
         // check for info file
-        System.IO.StreamReader infoFile = null;
-        try
+        TextAsset infoFile = (TextAsset)Resources.Load("SongData/" + name + "/" + name + "Info");
+        string[] lines = null;
+        if (infoFile != null)
         {
-            infoFile =
-                new System.IO.StreamReader(songDataDir + name + "/" + name + "Info.txt");
-        }
-        catch
-        {
-            Debug.Log("File not found for track metadata");
-            return;
+            lines = infoFile.text.Split('\n');
         }
         // create songNameText and destroy if already there
         if (songNameText != null)
@@ -100,7 +96,10 @@ public class SongMenuManager : MonoBehaviour {
         songNameText = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "SongNameText"));
         songNameText.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
         // edit songNameText if info file is given
-        songNameText.GetComponent<Text>().text = infoFile.ReadLine();
+        if (lines != null)
+        {
+            songNameText.GetComponent<Text>().text = lines[0];
+        }
         // create songDescription and destroy if already there
         if (songDescription != null)
             DestroyImmediate(songDescription);
@@ -108,10 +107,9 @@ public class SongMenuManager : MonoBehaviour {
         songDescription.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
         // edit songDescription
         string description = "";
-        string line;
-        while ((line = infoFile.ReadLine()) != null)
+        for (int i = 0; lines != null &&  i < lines.Length; i++)
         {
-            description += line + "\n";
+            description += lines[i] + "\n";
         }
         songDescription.GetComponent<Text>().text = description;
     }

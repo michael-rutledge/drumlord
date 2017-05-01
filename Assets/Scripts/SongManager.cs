@@ -76,7 +76,7 @@ public class SongManager : MonoBehaviour {
         tomAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Tom");
         fixNullTracks();
         // init midi
-        midi = new MidiFile("Assets/Resources/SongData/" + songName + "/" + songName +
+        midi = new MidiFile(Application.streamingAssetsPath + "/" + songName +
             difficulty + ".mid");
         tempo = null;
         bpm = 1;
