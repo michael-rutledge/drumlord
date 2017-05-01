@@ -76,9 +76,11 @@ public class SongMenuManager : MonoBehaviour {
         albumArt = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "AlbumArt"));
         albumArt.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
         // use custom art if given within songData
-        if (Resources.Load(songDataDir + name + "Art") != null)
+        if (Resources.Load<Sprite>("SongData/" + name + "/"  + name + "Art") != null)
         {
-            albumArt.GetComponent<Image>().sprite = (Sprite)Resources.Load(songDataDir + name + "Art");
+            Debug.Log("SPRITE CHANGE");
+            albumArt.GetComponent<Image>().sprite =
+                Resources.Load<Sprite>("SongData/" + name + "/" + name + "Art");
         }
         // check for info file
         System.IO.StreamReader infoFile = null;
