@@ -129,6 +129,6 @@ public class SongMenuManager : MonoBehaviour {
         Debug.Log("PLaying Level at difficulty: " + ApplicationModel.difficulty);
         // load play scene
         if (ApplicationModel.selectedSongId != null)
-            SceneManager.LoadScene("basicMotionTest");
+            SceneManager.LoadScene("playScene");
     }
 }
