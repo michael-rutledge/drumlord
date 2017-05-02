@@ -21,6 +21,7 @@ public class SongManager : MonoBehaviour {
         public float timestamp;                 // moment in realtime when note is hit (in seconds)
         public GameObject rollNote;             // 3d object representation of note
         public GameObject hitParticles;         // particle system for hits
+        public int state;                       // 0 = normal, 1 = hit, 2 = miss
     };
     private List<GameObject> beatTicks = new List<GameObject>();
     // MIDI stuff
@@ -146,7 +147,7 @@ public class SongManager : MonoBehaviour {
         // spawn roll notes
         Note curRollNote;
         while (curRollIndex < notes.Count
-            && notes.ElementAt(curRollIndex).timestamp - ROLL_TIME < curTime )
+            && notes.ElementAt(curRollIndex).timestamp - ROLL_TIME < curTime)
         {
             curRollNote = notes.ElementAt(curRollIndex);
             // make a clone of RollNote prefab then make its parent the roll
@@ -200,7 +201,7 @@ public class SongManager : MonoBehaviour {
         {
             Note n = notes.ElementAt(i);
 
-            if (n.rollNote != null)
+            if (n.rollNote != null && n.state != 1)
             {
                 float rollTick = 9.96f * (curTime - n.timestamp) / ROLL_TIME + 4.98f;
                 Vector3 oldPos = n.rollNote.transform.localPosition;
@@ -214,7 +215,7 @@ public class SongManager : MonoBehaviour {
             Note elem = notesInWindow.ElementAt(i);
             float windowStart = elem.timestamp - HIT_WINDOW / 2;
             // note missed
-            if (curTime - elem.timestamp > HIT_WINDOW / 2)
+            if (curTime - elem.timestamp > HIT_WINDOW / 2 && elem.state == 0)
             {
                 streak = 0;
                 multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
@@ -239,11 +240,23 @@ public class SongManager : MonoBehaviour {
                 {
                     tomAudio.volume = 0.0f;
                 }
-                DestroyImmediate(elem.rollNote);
-                notesInWindow.RemoveAt(i);
+                elem.state = 2;
+            }
+            // note miss fade out
+            else if (elem.state == 2)
+            {
+                float colorD = Time.deltaTime * 5;
+                Color oldColor = elem.rollNote.GetComponent<MeshRenderer>().material.color;
+                elem.rollNote.GetComponent<MeshRenderer>().material.color = 
+                    new Color(oldColor.r - colorD, oldColor.g - colorD, oldColor.b - colorD, oldColor.a - colorD);
+                if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a <= 0)
+                {
+                    DestroyImmediate(elem.rollNote);
+                    notesInWindow.RemoveAt(i);
+                }
             }
             // note hit
-            else
+            else if (elem.state == 0)
             {
                 // hihat
                 if (isHiHat(elem) &&
@@ -296,6 +309,26 @@ public class SongManager : MonoBehaviour {
                 {
                     hitDrum(null, bassAudio, elem, i);
                 }
+            }
+            // Note hit change color
+            else if (elem.state == 1)
+            {
+                float colorD = Time.deltaTime * 20;
+                Color oldColor = elem.rollNote.GetComponent<MeshRenderer>().material.color;
+                Vector3 oldScale = elem.rollNote.transform.localScale;
+                elem.rollNote.GetComponent<MeshRenderer>().material.color =
+                    new Color(oldColor.r + colorD, oldColor.g + colorD, oldColor.b + colorD, oldColor.a - colorD);
+
+                elem.rollNote.transform.localScale = new Vector3(oldScale.x * (1 + Time.deltaTime * 5), oldScale.y * (1 +  Time.deltaTime * 5), 1);
+                if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a <= 0)
+                {
+                    DestroyImmediate(elem.rollNote);
+                    notesInWindow.RemoveAt(i);
+                }
+            }
+            else
+            {
+                Debug.Log("FUCKED UP");
             }
         }
     }
@@ -415,8 +448,11 @@ public class SongManager : MonoBehaviour {
         }
         // deal with audio
         source.volume = 1.0f;
+        /*
         DestroyImmediate(elem.rollNote);
         notesInWindow.RemoveAt(i);
+        */
+        elem.state = 1;
         // deal with score
         streak++;
         multiplier = streak / 10 + 1;
