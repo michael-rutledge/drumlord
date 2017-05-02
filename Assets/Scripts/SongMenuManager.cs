@@ -19,6 +19,7 @@ public class SongMenuManager : MonoBehaviour {
     // track description stuff
     private GameObject albumArt = null, songNameText = null, songDescription = null;
 
+
 	// Use this for initialization
 	void Start () {
         // get string arrays for the song data
@@ -28,7 +29,7 @@ public class SongMenuManager : MonoBehaviour {
         {
             // take the absolute path off of the ids
             songDataIds[i] = System.IO.Path.GetFileName(songDataIds[i]);
-            songDataIds[i] = songDataIds[i].Substring(0, songDataIds[i].Length - 10);
+            songDataIds[i] = songDataIds[i].Substring(0, songDataIds[i].Length - 4);
             string curId = songDataIds[i];
             // instantiate the button and put in the scroll view
             GameObject button = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "ScrollViewButton"));
@@ -56,6 +57,7 @@ public class SongMenuManager : MonoBehaviour {
         }
 	}
 	
+
 	// Update is called once per frame
 	void Update () {
 		if (ApplicationModel.selectedSongId == null)
@@ -67,6 +69,7 @@ public class SongMenuManager : MonoBehaviour {
             playButton.GetComponent<Button>().interactable = true;
         }
 	}
+
 
     public void showMetaData(string name)
     {
@@ -118,6 +121,13 @@ public class SongMenuManager : MonoBehaviour {
     // play button function
     public void playSong()
     {
+        // get difficulty from dropdown
+        GameObject diffMenu = GameObject.Find("Dropdown");
+        int diffIndex = diffMenu.GetComponent<Dropdown>().value;
+        Dropdown.OptionData optData = diffMenu.GetComponent<Dropdown>().options[diffIndex];
+        ApplicationModel.difficulty = optData.text;
+        Debug.Log("PLaying Level at difficulty: " + ApplicationModel.difficulty);
+        // load play scene
         if (ApplicationModel.selectedSongId != null)
             SceneManager.LoadScene("basicMotionTest");
     }

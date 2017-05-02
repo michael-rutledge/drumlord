@@ -25,11 +25,9 @@ public class StickRightManager : MonoBehaviour
         {
             //SteamVR.instance.hmd.ResetSeatedZeroPose();
             actionMenuPressed = true;
-            Debug.Log("RIGHT BUTTON PRESS");
         }
         else if (rightDevice.GetPressUp(SteamVR_Controller.ButtonMask.ApplicationMenu)) {
             actionMenuPressed = false;
-            Debug.Log("RIGHT BUTTON RELEASE");
         }
     }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 public class ApplicationModel : MonoBehaviour {
 
     public static string selectedSongId = null;
+    public static string difficulty = "Expert";
 
 	// Use this for initialization
 	void Start () {
