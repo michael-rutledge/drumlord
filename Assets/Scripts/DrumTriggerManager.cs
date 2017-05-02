@@ -31,10 +31,10 @@ public class DrumTriggerManager : MonoBehaviour {
             case "SnareDrum":
                 this.GetComponent<MeshRenderer>().material.color = new Color(1, .75f, .75f, 1);
                 break;
-            case "HiHat":
+            case "HiHatImposter":
                 this.GetComponent<MeshRenderer>().material.color = new Color(.99f, .99f, .59f, 1);
                 break;
-            case "Crash":
+            case "CrashImposter":
                 this.GetComponent<MeshRenderer>().material.color = new Color(.47f, .87f, .47f, 1);
                 break;
             case "Ride":
