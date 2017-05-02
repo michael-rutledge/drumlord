@@ -10,7 +10,7 @@ public class SongManager : MonoBehaviour {
     // constants
     private const float EPSILON = 0.022f;
     private const float AUDIO_DELAY = 0.1f;
-    private const float HIT_WINDOW = 0.16f;
+    private const float HIT_WINDOW = 0.22f;
     private const string PREFAB_DIR = "Prefabs/";
     private const string SONG_DIR = "SongData/";
     private float ROLL_TIME = 1.5f;
