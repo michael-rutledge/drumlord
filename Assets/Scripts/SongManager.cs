@@ -91,7 +91,7 @@ public class SongManager : MonoBehaviour {
                 bpm = (int)(1 / secondsPerQuarterNote * 60);
                 startBuffer = secondsPerQuarterNote * 8;
                 // use default roll time to find new one
-                ROLL_TIME *= secondsPerQuarterNote * 4;
+                ROLL_TIME *= secondsPerQuarterNote * 2;
                 Debug.Log("Playing song with bpm " + bpm);
             }
             // for actual note hits, report back information
@@ -202,7 +202,7 @@ public class SongManager : MonoBehaviour {
 
             if (n.rollNote != null && n.state != 1)
             {
-                float rollTick = 9.96f * (curTime - n.timestamp) / ROLL_TIME + 4.98f;
+                float rollTick = 9.7f * (curTime - n.timestamp) / ROLL_TIME + 4.85f;
                 Vector3 oldPos = n.rollNote.transform.localPosition;
                 n.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, -rollTick);
             }
@@ -388,7 +388,7 @@ public class SongManager : MonoBehaviour {
         // move beat ticks
         for (int i = 0; i < beatTicks.Count; i++)
         {
-            float rollTick = 9.96f * Time.deltaTime / ROLL_TIME;
+            float rollTick = 9.7f * Time.deltaTime / ROLL_TIME;
             Vector3 oldPos = beatTicks.ElementAt(i).transform.localPosition;
             beatTicks.ElementAt(i).transform.localPosition = new Vector3(oldPos.x, oldPos.y, oldPos.z - rollTick);
             // delete beat tick if under the roll
