@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using NAudio.Midi;
+using UnityEngine.SceneManagement;
 
 public class SongManager : MonoBehaviour {
 
@@ -41,7 +42,11 @@ public class SongManager : MonoBehaviour {
     //multiplier stuff
     private int streak = 0;
     private int multiplier = 0;
+    //score stuff
     private int score = 0;
+    private int highStreak = 0;
+    private int notesMissed = 0;
+    private int notesHit = 0;
     public GameObject multiplierText;
     public GameObject streakText;
     public GameObject scoreText;
@@ -50,7 +55,7 @@ public class SongManager : MonoBehaviour {
     public float curTime;
     private bool startFlag = false;
     private string songName;
-    public string difficulty = "Expert";
+    private string difficulty;
     private AudioSource[] audioSources;
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio, tomAudio;
     public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager, highTomManager,
@@ -61,6 +66,7 @@ public class SongManager : MonoBehaviour {
     void Start () {
         // pass selected song id from menu
         songName = ApplicationModel.selectedSongId;
+        difficulty = ApplicationModel.difficulty;
         // init audio
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
@@ -217,6 +223,7 @@ public class SongManager : MonoBehaviour {
             if (curTime - elem.timestamp > HIT_WINDOW / 2 && elem.state == 0)
             {
                 streak = 0;
+                notesMissed++;
                 multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
                 streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
                 // hihat
@@ -330,6 +337,15 @@ public class SongManager : MonoBehaviour {
             {
                 Debug.Log("FUCKED UP");
             }
+        }
+        // endgame logic
+        if (startFlag && !songAudio.isPlaying)
+        {
+            ApplicationModel.score = score;
+            ApplicationModel.highStreak = highStreak;
+            ApplicationModel.notesMissed = notesMissed;
+            ApplicationModel.percentHit = (int) (((float)notesHit / (notesMissed + notesHit))*100);
+            SceneManager.LoadScene("resultScreen");
         }
     }
 
@@ -455,6 +471,8 @@ public class SongManager : MonoBehaviour {
         elem.state = 1;
         // deal with score
         streak++;
+        highStreak = streak > highStreak ? streak : highStreak;
+        notesHit++;
         multiplier = streak / 10 + 1;
         multiplier = (multiplier > 5) ? 5 : multiplier;
         if (streak > 0)

@@ -18,6 +18,7 @@ public class SongMenuManager : MonoBehaviour {
     public GameObject playButton;
     // track description stuff
     private GameObject albumArt = null, songNameText = null, songDescription = null;
+    private string curSongName = null;
 
 
 	// Use this for initialization
@@ -102,6 +103,7 @@ public class SongMenuManager : MonoBehaviour {
         if (lines != null)
         {
             songNameText.GetComponent<Text>().text = lines[0];
+            curSongName = lines[0];
         }
         // create songDescription and destroy if already there
         if (songDescription != null)
@@ -126,6 +128,7 @@ public class SongMenuManager : MonoBehaviour {
         int diffIndex = diffMenu.GetComponent<Dropdown>().value;
         Dropdown.OptionData optData = diffMenu.GetComponent<Dropdown>().options[diffIndex];
         ApplicationModel.difficulty = optData.text;
+        ApplicationModel.songName = curSongName;
         Debug.Log("PLaying Level at difficulty: " + ApplicationModel.difficulty);
         // load play scene
         if (ApplicationModel.selectedSongId != null)
