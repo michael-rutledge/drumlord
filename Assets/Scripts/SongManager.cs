@@ -193,7 +193,7 @@ public class SongManager : MonoBehaviour {
             else if (isLowTom(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(0.04f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 0.5f, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.5f, 1.0f, 1);
             }
             else if (isBass((curRollNote))) {
                 curRollNote.rollNote.transform.localScale = new Vector3(10.0f, 0.15f, 0.1f);
@@ -417,6 +417,9 @@ public class SongManager : MonoBehaviour {
     }
     void hitDrum(DrumTriggerManager dm, AudioSource source, Note elem, int i)
     {
+        // set location to right on the beatline
+        Vector3 oldPos = elem.rollNote.transform.localPosition;
+        elem.rollNote.transform.localPosition = new Vector3(oldPos.x, oldPos.y, -4.85f);
         // particle effects
         if (isBass(elem))
         {

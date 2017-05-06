@@ -25,10 +25,10 @@ public class DrumColorManager : MonoBehaviour {
                 this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
                 break;
             case "MedTom":
-                this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
+                this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 0.5f, 1.0f, 1);
                 break;
             case "LowTom":
-                this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
+                this.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.5f, 1.0f, 1);
                 break;
         }
     }
