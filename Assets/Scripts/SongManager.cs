@@ -94,7 +94,7 @@ public class SongManager : MonoBehaviour {
             {
                 tempo = (TempoEvent)note;
                 secondsPerQuarterNote = (float)tempo.MicrosecondsPerQuarterNote / 1000000;
-                bpm = (int)(1 / secondsPerQuarterNote * 60);
+                bpm = (int)Mathf.Round(1 / secondsPerQuarterNote * 60);
                 startBuffer = secondsPerQuarterNote * 8;
                 // use default roll time to find new one
                 ROLL_TIME *= secondsPerQuarterNote * 2;
