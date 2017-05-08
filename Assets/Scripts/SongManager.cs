@@ -51,6 +51,7 @@ public class SongManager : MonoBehaviour {
     public GameObject multiplierText;
     public GameObject streakText;
     public GameObject scoreText;
+    private bool bassAvailable = false;
     // Audio stuff
     private float startBuffer;
     public float curTime;
@@ -82,8 +83,6 @@ public class SongManager : MonoBehaviour {
         StartCoroutine(fetchAudioWWW(prefix + songName + "Cymbal", cymbalAudio));
         tomAudio = audioSources[5];
         StartCoroutine(fetchAudioWWW(prefix + songName + "Tom", tomAudio));
-        // deal with null tracks
-        fixNullTracks();
         // init midi
         midi = new MidiFile(Application.streamingAssetsPath + "/" + songName + "/" + songName + ".mid");
         tempo = null;
@@ -110,9 +109,8 @@ public class SongManager : MonoBehaviour {
                 // check what quarter note we are on, use that to calculate realTime
                 float quarterNoteOn = (float)note.AbsoluteTime / midi.DeltaTicksPerQuarterNote;
                 float realTime = quarterNoteOn * 60 / bpm;
-                Debug.Log("QNO: " + quarterNoteOn);
                 // create the note and assign its data
-                if (noteInDifficulty(tempNote, quarterNoteOn))
+                if (noteInDifficulty(tempNote, quarterNoteOn) && (bassAvailable || tempNote.NoteName != "C3"))
                 {
                     Note noteToAdd = new global::SongManager.Note();
                     noteToAdd.value = tempNote.NoteName;
@@ -498,37 +496,6 @@ public class SongManager : MonoBehaviour {
         streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
         scoreText.GetComponent<TextMesh>().text = "Score: " + score;
     }
-
-
-    private void fixNullTracks()
-    {
-        if (bassAudio.clip == null)
-        {
-            bassAudio.clip = songAudio.clip;
-            bassAudio.volume = 0.0f;
-        }
-        if (snareAudio.clip == null)
-        {
-            snareAudio.clip = songAudio.clip;
-            snareAudio.volume = 0.0f;
-        }
-        if (hihatAudio.clip == null)
-        {
-            hihatAudio.clip = songAudio.clip;
-            hihatAudio.volume = 0.0f;
-        }
-        if (cymbalAudio.clip == null)
-        {
-            cymbalAudio.clip = songAudio.clip;
-            cymbalAudio.volume = 0.0f;
-        }
-        if (tomAudio.clip == null)
-        {
-            tomAudio.clip = songAudio.clip;
-            tomAudio.volume = 0.0f;
-        }
-    }
-    
 
     private IEnumerator fetchAudioWWW(string path, AudioSource source)
     {
