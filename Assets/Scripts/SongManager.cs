@@ -14,6 +14,7 @@ public class SongManager : MonoBehaviour {
     private const float HIT_WINDOW = 0.22f;
     private const string PREFAB_DIR = "Prefabs/";
     private const string SONG_DIR = "SongData/";
+    private const string fPrefix = "file://";
     private float ROLL_TIME = 1.5f;
     // note representations
     public class Note
@@ -68,22 +69,23 @@ public class SongManager : MonoBehaviour {
         songName = ApplicationModel.selectedSongId;
         difficulty = ApplicationModel.difficulty;
         // init audio
+        string prefix = fPrefix + Application.streamingAssetsPath + "/" + songName + "/";
         audioSources = GetComponents<AudioSource>();
         songAudio = audioSources[0];
-        songAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName);
+        StartCoroutine(fetchAudioWWW(prefix + songName, songAudio));
         bassAudio = audioSources[1];
-        bassAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Bass");
+        StartCoroutine(fetchAudioWWW(prefix + songName + "Bass", bassAudio));
         snareAudio = audioSources[2];
-        snareAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Snare");
+        StartCoroutine(fetchAudioWWW(prefix + songName + "Snare", snareAudio));
         hihatAudio = audioSources[3];
-        hihatAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Hihat");
+        StartCoroutine(fetchAudioWWW(prefix + songName + "Hihat", hihatAudio));
         cymbalAudio = audioSources[4];
-        cymbalAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Cymbal");
+        StartCoroutine(fetchAudioWWW(prefix + songName + "Cymbal", cymbalAudio));
         tomAudio = audioSources[5];
-        tomAudio.clip = (AudioClip)Resources.Load(SONG_DIR + songName + "/" + songName + "Tom");
+        StartCoroutine(fetchAudioWWW(prefix + songName + "Tom", tomAudio));
         fixNullTracks();
         // init midi
-        midi = new MidiFile(Application.streamingAssetsPath + "/" + songName + ".mid");
+        midi = new MidiFile(Application.streamingAssetsPath + "/" + songName +"/" + songName + ".mid");
         tempo = null;
         bpm = 1;
         totalNotes = 0;
@@ -339,7 +341,7 @@ public class SongManager : MonoBehaviour {
             }
         }
         // endgame logic
-        if (startFlag && !songAudio.isPlaying)
+        if ((startFlag && !songAudio.isPlaying) || songAudio == null)
         {
             ApplicationModel.score = score;
             ApplicationModel.highStreak = highStreak;
@@ -351,42 +353,42 @@ public class SongManager : MonoBehaviour {
 
 
     // helper boolean functions to determine what kind of hit it is
-    bool isBass(Note note)
+    private bool isBass(Note note)
     {
         return note.value == "C3";
     }
-    bool isSnare(Note note)
+    private bool isSnare(Note note)
     {
         return note.value == "D3" || note.value == "E3" || note.value == "A#2";
     }
-    bool isHiHat(Note note)
+    private bool isHiHat(Note note)
     {
         return note.value == "F#3" || note.value == "G#3" || note.value == "A#3";
     }
-    bool isCrash(Note note)
+    private bool isCrash(Note note)
     {
         return note.value == "C#4";
     }
-    bool isRide(Note note)
+    private bool isRide(Note note)
     {
         return note.value == "D#4" || note.value == "F4";
     }
-    bool isHighTom(Note note)
+    private bool isHighTom(Note note)
     {
         return note.value == "C4" || note.value == "D4";
     }
-    bool isMedTom(Note note)
+    private bool isMedTom(Note note)
     {
         return note.value == "A3" || note.value == "B3";
     }
-    bool isLowTom(Note note)
+    private bool isLowTom(Note note)
     {
         return note.value == "F3" || note.value == "G3";
     }
 
 
     // audio helper functions
-    void updateBeatTicks()
+    private void updateBeatTicks()
     {
         // spawn beat ticks on every quarter note
         if (curTime > numTicks * secondsPerQuarterNote)
@@ -415,7 +417,9 @@ public class SongManager : MonoBehaviour {
             }
         }
     }
-    void hitDrum(DrumTriggerManager dm, AudioSource source, Note elem, int i)
+
+
+    private void hitDrum(DrumTriggerManager dm, AudioSource source, Note elem, int i)
     {
         // set location to right on the beatline
         Vector3 oldPos = elem.rollNote.transform.localPosition;
@@ -467,10 +471,6 @@ public class SongManager : MonoBehaviour {
         }
         // deal with audio
         source.volume = 1.0f;
-        /*
-        DestroyImmediate(elem.rollNote);
-        notesInWindow.RemoveAt(i);
-        */
         elem.state = 1;
         // deal with score
         streak++;
@@ -484,7 +484,9 @@ public class SongManager : MonoBehaviour {
         streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
         scoreText.GetComponent<TextMesh>().text = "Score: " + score;
     }
-    void fixNullTracks()
+
+
+    private void fixNullTracks()
     {
         if (bassAudio.clip == null)
         {
@@ -514,4 +516,27 @@ public class SongManager : MonoBehaviour {
     }
     
 
+    private IEnumerator fetchAudioWWW(string path, AudioSource source)
+    {
+        Debug.Log("Running fetchAudioWWW...\n");
+        WWW ret = null;
+        // check for wav by default, but change to ogg if necessary
+        string suffix = ".wav";
+        if (System.IO.File.Exists(path.Substring(7) + ".ogg"))
+        {
+            suffix = ".ogg";
+        }
+        // check for wav
+        ret = new WWW(path + suffix);
+        // wait for download
+        yield return ret;
+        if (string.IsNullOrEmpty(ret.error))
+        {
+            source.clip = ret.GetAudioClip(false, false);
+        }
+        else
+        {
+            Debug.LogError(ret.error);
+        }
+    }
 }

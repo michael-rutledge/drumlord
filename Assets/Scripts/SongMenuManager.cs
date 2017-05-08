@@ -9,6 +9,7 @@ public class SongMenuManager : MonoBehaviour {
     // constants
     private const string PREFAB_DIR = "Prefabs/";
     private const float BUTTON_OFFSET = 40;
+    private const string fPrefix = "file://";
     // meta data stuff
     private string[] songDataIds;
     private string midiDataDir;
@@ -24,14 +25,11 @@ public class SongMenuManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         // get string arrays for the song data
-        midiDataDir = Application.streamingAssetsPath;
-        songDataIds = System.IO.Directory.GetFiles(midiDataDir, "*.mid");
+        songDataIds = System.IO.Directory.GetDirectories(Application.streamingAssetsPath);
         for (int i = 0; i < songDataIds.Length; i++)
         {
             // take the absolute path off of the ids
-            songDataIds[i] = System.IO.Path.GetFileName(songDataIds[i]);
-            songDataIds[i] = songDataIds[i].Substring(0, songDataIds[i].Length - 4);
-            string curId = songDataIds[i];
+            string curId = System.IO.Path.GetFileName(songDataIds[i]);
             // instantiate the button and put in the scroll view
             GameObject button = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "ScrollViewButton"));
             button.transform.SetParent(GameObject.Find("SongButtons").transform, false);
@@ -42,21 +40,19 @@ public class SongMenuManager : MonoBehaviour {
             button.name = curId;
             button.GetComponentInChildren<Text>().text = button.name;
             // check for info file and change the title to grammatically correct form
-            TextAsset infoFile = (TextAsset)Resources.Load("SongData/" + button.name + "/"
-                + button.name + "Info");
-            string[] lines = null;
-            if (infoFile != null)
+            System.IO.StreamReader infoFile = 
+                new System.IO.StreamReader(songDataIds[i] + "/" + curId + "Info.txt");
+            string line = null;
+            if ((line = infoFile.ReadLine()) != null)
             {
-                lines = infoFile.text.Split('\n');
-                button.GetComponentInChildren<Text>().text = lines[0];
+                button.GetComponentInChildren<Text>().text = line;
             }
             // give it the actions
             button.GetComponent<Button>().onClick.AddListener(() => showMetaData(curId));
             // add it to the list
             songButtons.Add(button);
-            Debug.Log(curId);
         }
-	}
+    }
 	
 
 	// Update is called once per frame
@@ -81,29 +77,33 @@ public class SongMenuManager : MonoBehaviour {
             DestroyImmediate(albumArt);
         albumArt = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "AlbumArt"));
         albumArt.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
-        // use custom art if given within songData
-        if (Resources.Load<Sprite>("SongData/" + name + "/"  + name + "Art") != null)
+        // use custom art if given within songData, check for different extensions
+        WWW wArt = fetchImageWWW(fPrefix + Application.streamingAssetsPath + "/" + name + "/" +
+            name + "Art");
+        if (wArt != null)
         {
-            albumArt.GetComponent<Image>().sprite =
-                Resources.Load<Sprite>("SongData/" + name + "/" + name + "Art");
+            // create sprite from loaded image
+            Texture artTex = wArt.texture;
+            Sprite sprite = Sprite.Create(artTex as Texture2D,
+                new Rect(0, 0, artTex.width, artTex.height), Vector2.zero);
+            // use said sprite
+            albumArt.GetComponent<Image>().sprite = sprite;
         }
         // check for info file
-        TextAsset infoFile = (TextAsset)Resources.Load("SongData/" + name + "/" + name + "Info");
-        string[] lines = null;
-        if (infoFile != null)
-        {
-            lines = infoFile.text.Split('\n');
-        }
+        System.IO.StreamReader infoFile =
+                new System.IO.StreamReader(Application.streamingAssetsPath + 
+                "/" + name + "/" + name + "Info.txt");
+        string line = null;
         // create songNameText and destroy if already there
         if (songNameText != null)
             DestroyImmediate(songNameText);
         songNameText = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "SongNameText"));
         songNameText.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
         // edit songNameText if info file is given
-        if (lines != null)
+        if ((line = infoFile.ReadLine()) != null)
         {
-            songNameText.GetComponent<Text>().text = lines[0];
-            curSongName = lines[0];
+            songNameText.GetComponent<Text>().text = line;
+            curSongName = line;
         }
         // create songDescription and destroy if already there
         if (songDescription != null)
@@ -112,9 +112,9 @@ public class SongMenuManager : MonoBehaviour {
         songDescription.transform.SetParent(GameObject.Find("SongMenuCanvas").transform, false);
         // edit songDescription
         string description = "";
-        for (int i = 0; lines != null &&  i < lines.Length; i++)
+        while ((line = infoFile.ReadLine()) != null)
         {
-            description += lines[i] + "\n";
+            description += line + "\n";
         }
         songDescription.GetComponent<Text>().text = description;
     }
@@ -133,5 +133,28 @@ public class SongMenuManager : MonoBehaviour {
         // load play scene
         if (ApplicationModel.selectedSongId != null)
             SceneManager.LoadScene("playScene");
+    }
+
+
+    public WWW fetchImageWWW(string path)
+    {
+        WWW ret = null;
+        // check for png
+        ret = new WWW(path + ".png");
+        if (string.IsNullOrEmpty(ret.error))
+        {
+            return ret;
+        }
+        ret.Dispose();
+        // check for jpg
+        ret = new WWW(path + ".jpg");
+        if (string.IsNullOrEmpty(ret.error))
+        {
+            return ret;
+        }
+        ret.Dispose();
+        // return null otherwise
+        Debug.Log("BAD IMAGE LOAD");
+        return null;
     }
 }

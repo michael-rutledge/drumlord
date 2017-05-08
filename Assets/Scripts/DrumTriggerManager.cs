@@ -48,8 +48,8 @@ public class DrumTriggerManager : MonoBehaviour {
             float tranM = rightDevice.velocity.magnitude;
             float velM = angM + tranM;
             rightHit = songManager.curTime;
-            Debug.Log(this.name + " collision with " + other.gameObject.name +
-                " with velocity " + velM + " at time " + rightHit);
+            //Debug.Log(this.name + " collision with " + other.gameObject.name +
+            //    " with velocity " + velM + " at time " + rightHit);
         }
         // Check if left stick hits drum
         if (other.gameObject.name.Equals("StickLeftHead") &&
@@ -60,8 +60,8 @@ public class DrumTriggerManager : MonoBehaviour {
             float tranM = leftDevice.velocity.magnitude;
             float velM = angM + tranM;
             leftHit = songManager.curTime;
-            Debug.Log(this.name + " collision with " + other.gameObject.name +
-                " with velocity " + velM + " at time " + leftHit);
+            //Debug.Log(this.name + " collision with " + other.gameObject.name +
+            //    " with velocity " + velM + " at time " + leftHit);
         }
     }
 
