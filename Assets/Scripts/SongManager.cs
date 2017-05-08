@@ -56,7 +56,6 @@ public class SongManager : MonoBehaviour {
     public float curTime;
     private bool startFlag = false;
     private string songName;
-    private string difficulty;
     private AudioSource[] audioSources;
     private AudioSource songAudio, bassAudio, snareAudio, hihatAudio, cymbalAudio, tomAudio;
     public DrumTriggerManager snareManager, hihatManager, crashManager, rideManager, highTomManager,
@@ -67,10 +66,10 @@ public class SongManager : MonoBehaviour {
     void Start () {
         // pass selected song id from menu
         songName = ApplicationModel.selectedSongId;
-        difficulty = ApplicationModel.difficulty;
         // init audio
         string prefix = fPrefix + Application.streamingAssetsPath + "/" + songName + "/";
         audioSources = GetComponents<AudioSource>();
+        // for each possible track, fetch the audio file from streaming assets directory
         songAudio = audioSources[0];
         StartCoroutine(fetchAudioWWW(prefix + songName, songAudio));
         bassAudio = audioSources[1];
@@ -83,9 +82,10 @@ public class SongManager : MonoBehaviour {
         StartCoroutine(fetchAudioWWW(prefix + songName + "Cymbal", cymbalAudio));
         tomAudio = audioSources[5];
         StartCoroutine(fetchAudioWWW(prefix + songName + "Tom", tomAudio));
+        // deal with null tracks
         fixNullTracks();
         // init midi
-        midi = new MidiFile(Application.streamingAssetsPath + "/" + songName +"/" + songName + ".mid");
+        midi = new MidiFile(Application.streamingAssetsPath + "/" + songName + "/" + songName + ".mid");
         tempo = null;
         bpm = 1;
         totalNotes = 0;
@@ -107,13 +107,19 @@ public class SongManager : MonoBehaviour {
             {
                 totalNotes++;
                 NoteOnEvent tempNote = (NoteOnEvent)note;
+                // check what quarter note we are on, use that to calculate realTime
                 float quarterNoteOn = (float)note.AbsoluteTime / midi.DeltaTicksPerQuarterNote;
                 float realTime = quarterNoteOn * 60 / bpm;
-                Note noteToAdd = new global::SongManager.Note();
-                noteToAdd.value = tempNote.NoteName;
-                noteToAdd.timestamp = realTime + startBuffer;
-                noteToAdd.rollNote = null;
-                notes.Add(noteToAdd);
+                Debug.Log("QNO: " + quarterNoteOn);
+                // create the note and assign its data
+                if (noteInDifficulty(tempNote, quarterNoteOn))
+                {
+                    Note noteToAdd = new global::SongManager.Note();
+                    noteToAdd.value = tempNote.NoteName;
+                    noteToAdd.timestamp = realTime + startBuffer;
+                    noteToAdd.rollNote = null;
+                    notes.Add(noteToAdd);
+                }
             }
         }
         Debug.Log("Total drum hits in song: " + totalNotes);
@@ -546,5 +552,47 @@ public class SongManager : MonoBehaviour {
         {
             Debug.LogError(ret.error);
         }
+    }
+
+
+    // midi helper functions
+    private bool noteInDifficulty(NoteOnEvent tempNote, float qn)
+    {
+        // quantify difficulty to make filtering notes easier, expert by default
+        int diffIndex = 3;
+        switch (ApplicationModel.difficulty)
+        {
+            case "Hard":
+                diffIndex = 2;
+                break;
+            case "Medium":
+                diffIndex = 1;
+                break;
+            case "Easy":
+                diffIndex = 0;
+                break;
+            default:
+                break;
+        }
+        // by default and in expert mode, let all notes in
+        bool ret = true;
+        // Hard: prevent bass kicks that aren't on quarter notes
+        if (diffIndex <= 2)
+            ret &= !( tempNote.NoteName == "C3" && !modeqFloat(1.0f, qn) );
+        // Medium: prevent notes that arent at least 8th note complexity
+        if (diffIndex <= 1)
+            ret &= ( modeqFloat(1.0f, qn) || modeqFloat(0.5f, qn) ) && tempNote.NoteName != "C3";
+        // Easy:
+        if (diffIndex <= 0)
+            ret &= modeqFloat(1.0f, qn);
+        return ret;
+    }
+    private bool modeqFloat(float n, float qn)
+    {
+        int nInt = (int)(n * 100);
+        int qInt = (int)(qn * 100);
+        nInt %= 100;
+        qInt %= 100;
+        return nInt == qInt;
     }
 }
