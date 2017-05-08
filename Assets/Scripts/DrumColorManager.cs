@@ -10,25 +10,28 @@ public class DrumColorManager : MonoBehaviour {
         switch (this.name)
         {
             case "SnareDrum":
-                this.GetComponent<MeshRenderer>().material.color = new Color(1, .75f, .75f, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.snareColor;
                 break;
             case "HiHatImposter":
-                this.GetComponent<MeshRenderer>().material.color = new Color(.99f, .99f, .59f, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.hiHatColor;
                 break;
             case "CrashImposter":
-                this.GetComponent<MeshRenderer>().material.color = new Color(.47f, .87f, .47f, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.crashColor;
                 break;
             case "RideImposter":
-                this.GetComponent<MeshRenderer>().material.color = new Color(.63f, .77f, 1, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.rideColor;
                 break;
             case "HighTom":
-                this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.highTomColor;
                 break;
             case "MedTom":
-                this.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 0.5f, 1.0f, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.medTomColor;
                 break;
             case "LowTom":
-                this.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.5f, 1.0f, 1);
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.lowTomColor;
+                break;
+            case "BassDrum":
+                this.GetComponent<MeshRenderer>().material.color = ApplicationModel.bassColor;
                 break;
         }
     }

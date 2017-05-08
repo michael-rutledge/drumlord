@@ -165,41 +165,49 @@ public class SongManager : MonoBehaviour {
             if (isHiHat(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(-.02f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 1, 0, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.hiHatColor;
             }
             else if (isSnare(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(-.05f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1, 0, 0, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.snareColor;
             }
             else if (isCrash(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(-0.01f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0, 1, 0, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.crashColor;
             }
             else if (isRide(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(.06f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 1, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.rideColor;
             }
             else if (isHighTom(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(0.0f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 1.0f, 1.0f, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.highTomColor;
             }
             else if (isMedTom(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(0.02f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(0.0f, 0.5f, 1.0f, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.medTomColor;
             }
             else if (isLowTom(curRollNote))
             {
                 curRollNote.rollNote.transform.Translate(new Vector3(0.04f, 0.0f, 0.0f));
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.5f, 1.0f, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.lowTomColor;
             }
             else if (isBass((curRollNote))) {
                 curRollNote.rollNote.transform.localScale = new Vector3(10.0f, 0.15f, 0.1f);
-                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 0.67f, 0.0f, 1);
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
+                    ApplicationModel.bassColor;
             }
             ++curRollIndex;
         }

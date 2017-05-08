@@ -15,7 +15,7 @@ public class ResultScreenManager : MonoBehaviour {
         GameObject.Find("DifficultyText").GetComponent<Text>().text =
             "Difficulty: " + ApplicationModel.difficulty;
         GameObject.Find("PercentHitText").GetComponent<Text>().text =
-            "Percent Notes Hit: " + ApplicationModel.percentHit;
+            "Percent Notes Hit: " + ApplicationModel.percentHit + "%";
         GameObject.Find("NotesMissedText").GetComponent<Text>().text =
             "Notes Missed: " + ApplicationModel.notesMissed;
         GameObject.Find("HighStreakText").GetComponent<Text>().text =
