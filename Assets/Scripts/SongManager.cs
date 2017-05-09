@@ -165,6 +165,8 @@ public class SongManager : MonoBehaviour {
             // this allows for relative transforms making it easy to move the notes
             curRollNote.rollNote = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "RollNote"));
             curRollNote.rollNote.transform.SetParent(roll.transform, false);
+            curRollNote.rollNote.GetComponent<MeshRenderer>().material =
+                Resources.Load("Materials/rollNoteOpaque") as Material;
             // move the notes horizontally based upon their 
             if (isHiHat(curRollNote))
             {
@@ -267,6 +269,12 @@ public class SongManager : MonoBehaviour {
             {
                 float colorD = Time.deltaTime * 5;
                 Color oldColor = elem.rollNote.GetComponent<MeshRenderer>().material.color;
+                // change material to fading material at first
+                if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a == 1.0f)
+                {
+                    elem.rollNote.GetComponent<MeshRenderer>().material =
+                        Resources.Load("Materials/rollNoteFade") as Material;
+                }
                 elem.rollNote.GetComponent<MeshRenderer>().material.color = 
                     new Color(oldColor.r - colorD, oldColor.g - colorD, oldColor.b - colorD, oldColor.a - colorD);
                 if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a <= 0)
@@ -335,6 +343,12 @@ public class SongManager : MonoBehaviour {
             {
                 float colorD = Time.deltaTime * 10;
                 Color oldColor = elem.rollNote.GetComponent<MeshRenderer>().material.color;
+                // change material to fading material at first
+                if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a == 1.0f)
+                {
+                    elem.rollNote.GetComponent<MeshRenderer>().material =
+                        Resources.Load("Materials/rollNoteFade") as Material;
+                }
                 Vector3 oldScale = elem.rollNote.transform.localScale;
                 // change color to brighten and fade away
                 elem.rollNote.GetComponent<MeshRenderer>().material.color =
