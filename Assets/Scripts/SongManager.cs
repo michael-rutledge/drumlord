@@ -333,14 +333,14 @@ public class SongManager : MonoBehaviour {
             // Note hit change color
             else if (elem.state == 1)
             {
-                float colorD = Time.deltaTime * 20;
+                float colorD = Time.deltaTime * 10;
                 Color oldColor = elem.rollNote.GetComponent<MeshRenderer>().material.color;
                 Vector3 oldScale = elem.rollNote.transform.localScale;
                 // change color to brighten and fade away
                 elem.rollNote.GetComponent<MeshRenderer>().material.color =
                     new Color(oldColor.r + colorD, oldColor.g + colorD, oldColor.b + colorD, oldColor.a - colorD);
                 // change scale to get bigger as the note fades away
-                elem.rollNote.transform.localScale = new Vector3(oldScale.x * (1 + Time.deltaTime * 5), oldScale.y * (1 +  Time.deltaTime * 5), 1);
+                elem.rollNote.transform.localScale = new Vector3(oldScale.x * (1 + Time.deltaTime * 8), oldScale.y * (1 +  Time.deltaTime * 8), 1);
                 if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a <= 0)
                 {
                     DestroyImmediate(elem.rollNote);
