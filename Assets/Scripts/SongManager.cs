@@ -52,6 +52,8 @@ public class SongManager : MonoBehaviour {
     public GameObject streakText;
     public GameObject scoreText;
     private bool bassAvailable = false;
+    private KeyCode bassKey;
+    public bool bassDown;
     // Audio stuff
     private float startBuffer;
     public float curTime;
@@ -67,6 +69,9 @@ public class SongManager : MonoBehaviour {
     void Start () {
         // pass selected song id from menu
         songName = ApplicationModel.selectedSongId;
+        bassAvailable = ApplicationModel.bassAvailable;
+        bassKey = ApplicationModel.bassKey;
+        Debug.Log("available: " + bassAvailable + " key: " + bassKey);
         // init audio
         string prefix = fPrefix + Application.streamingAssetsPath + "/" + songName + "/";
         audioSources = GetComponents<AudioSource>();
@@ -131,7 +136,7 @@ public class SongManager : MonoBehaviour {
     void Update() {
         curTime = Time.fixedTime - realStartTime;
         // take care of buffer at start
-        if (!startFlag && curTime >= startBuffer)
+        if (!startFlag && curTime >= startBuffer - AUDIO_DELAY)
         {
             // play all tracks
             songAudio.Play();
@@ -332,8 +337,7 @@ public class SongManager : MonoBehaviour {
                 {
                     hitDrum(lowTomManager, tomAudio, elem, i);
                 }
-                //TODO bass checking
-                else if (isBass(elem))
+                if (isBass(elem) && Input.inputString != "" && Input.GetKeyDown(bassKey) && !bassDown)
                 {
                     hitDrum(null, bassAudio, elem, i);
                 }
@@ -366,6 +370,7 @@ public class SongManager : MonoBehaviour {
                 Debug.Log("FUCKED UP");
             }
         }
+        bassDown = Input.GetKeyDown(bassKey);
         // endgame logic
         if ((startFlag && !songAudio.isPlaying) || songAudio == null)
         {
@@ -576,6 +581,7 @@ public class SongManager : MonoBehaviour {
         int qInt = (int)(qn * 100);
         nInt %= 100;
         qInt %= 100;
-        return nInt == qInt;
+        return Mathf.Abs(nInt - qInt) <= 10;
     }
 }
+ 

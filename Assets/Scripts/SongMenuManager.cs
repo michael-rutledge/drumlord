@@ -65,6 +65,17 @@ public class SongMenuManager : MonoBehaviour {
         {
             playButton.GetComponent<Button>().interactable = true;
         }
+        if (Input.inputString != "")
+        {
+            foreach (KeyCode kcode in System.Enum.GetValues(typeof(KeyCode)))
+            {
+                if (Input.GetKeyDown(kcode))
+                {
+                    ApplicationModel.bassAvailable = true;
+                    ApplicationModel.bassKey = kcode;
+                }
+            }
+        }
 	}
 
 

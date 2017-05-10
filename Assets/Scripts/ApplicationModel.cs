@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ApplicationModel : MonoBehaviour {
 
+    // bass available from main menu
+    public static bool bassAvailable = false;
+    public static KeyCode bassKey;
     // song metadata
     public static string selectedSongId = null;
     public static string songName = null;
