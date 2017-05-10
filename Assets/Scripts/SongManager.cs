@@ -421,6 +421,8 @@ public class SongManager : MonoBehaviour {
         {
             beatTicks.Add((GameObject)Instantiate(Resources.Load(PREFAB_DIR + "BeatTick")));
             beatTicks.ElementAt(beatTicks.Count-1).transform.SetParent(roll.transform, false);
+            // render behind roll notes
+            beatTicks.ElementAt(beatTicks.Count - 1).GetComponent<MeshRenderer>().material.renderQueue = 3999;
             // every other beattick is bigger
             if (numTicks % 2 != 0)
             {
