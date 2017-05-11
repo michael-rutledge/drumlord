@@ -219,6 +219,7 @@ public class SongManager : MonoBehaviour {
                 curRollNote.rollNote.transform.localScale = new Vector3(10.0f, 0.15f, 0.1f);
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
                     ApplicationModel.bassColor;
+                curRollNote.rollNote.GetComponent<MeshRenderer>().material.renderQueue = 3999;
             }
             ++curRollIndex;
         }
@@ -427,7 +428,7 @@ public class SongManager : MonoBehaviour {
             beatTicks.Add((GameObject)Instantiate(Resources.Load(PREFAB_DIR + "BeatTick")));
             beatTicks.ElementAt(beatTicks.Count-1).transform.SetParent(roll.transform, false);
             // render behind roll notes
-            beatTicks.ElementAt(beatTicks.Count - 1).GetComponent<MeshRenderer>().material.renderQueue = 3999;
+            beatTicks.ElementAt(beatTicks.Count - 1).GetComponent<MeshRenderer>().material.renderQueue = 3998;
             // every other beattick is bigger
             if (numTicks % 2 != 0)
             {
