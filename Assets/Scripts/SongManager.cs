@@ -39,6 +39,7 @@ public class SongManager : MonoBehaviour {
     public float realStartTime = 100.0f;
     private int curIndex = 0;
     private int curRollIndex = 0;
+    private List<int> rollNoteIndeces = new List<int>();
     private GameObject roll;
     //multiplier stuff
     private int streak = 0;
@@ -166,6 +167,7 @@ public class SongManager : MonoBehaviour {
             && notes.ElementAt(curRollIndex).timestamp - ROLL_TIME < curTime)
         {
             curRollNote = notes.ElementAt(curRollIndex);
+            rollNoteIndeces.Add(curRollIndex);
             // make a clone of RollNote prefab then make its parent the roll
             // this allows for relative transforms making it easy to move the notes
             curRollNote.rollNote = (GameObject)Instantiate(Resources.Load(PREFAB_DIR + "RollNote"));
@@ -224,9 +226,9 @@ public class SongManager : MonoBehaviour {
             ++curRollIndex;
         }
         // move roll notes
-        for (int i = 0; i < notes.Count; i++)
+        for (int i = 0; i < rollNoteIndeces.Count; i++)
         {
-            Note n = notes.ElementAt(i);
+            Note n = notes.ElementAt(rollNoteIndeces.ElementAt(i));
 
             if (n.rollNote != null && n.state != 1)
             {
@@ -286,6 +288,7 @@ public class SongManager : MonoBehaviour {
                 if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a <= 0)
                 {
                     DestroyImmediate(elem.rollNote);
+                    rollNoteIndeces.RemoveAt(i);
                     notesInWindow.RemoveAt(i);
                 }
             }
@@ -363,6 +366,7 @@ public class SongManager : MonoBehaviour {
                 if (elem.rollNote.GetComponent<MeshRenderer>().material.color.a <= 0)
                 {
                     DestroyImmediate(elem.rollNote);
+                    rollNoteIndeces.RemoveAt(i);
                     notesInWindow.RemoveAt(i);
                 }
             }
