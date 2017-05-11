@@ -65,14 +65,18 @@ public class SongMenuManager : MonoBehaviour {
         {
             playButton.GetComponent<Button>().interactable = true;
         }
+        // check for bass pedal input
         if (Input.inputString != "")
         {
             foreach (KeyCode kcode in System.Enum.GetValues(typeof(KeyCode)))
             {
+                // call if key is down
                 if (Input.GetKeyDown(kcode))
                 {
                     ApplicationModel.bassAvailable = true;
                     ApplicationModel.bassKey = kcode;
+                    GameObject.Find("BassText").GetComponent<Text>().text = "Bass pedal found! Bound to key: \"" +
+                        kcode.ToString() + "\"";
                 }
             }
         }
