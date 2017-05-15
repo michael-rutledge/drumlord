@@ -57,6 +57,7 @@ public class SongManager : MonoBehaviour {
     public Color multiplierPurple = new Color(0.62f, 0.00f, 1.00f, 1);
     public GameObject streakText;
     public GameObject scoreText;
+    public GameObject streakPopup;
     private bool bassAvailable = false;
     private KeyCode bassKey;
     public bool bassDown;
@@ -252,7 +253,11 @@ public class SongManager : MonoBehaviour {
             if (curTime - elem.timestamp > HIT_WINDOW / 2 && elem.state == 0)
             {
                 streak = 0;
+                multiplier = 1;
                 notesMissed++;
+                // update text
+                multiplierText.GetComponent<TextMesh>().color = multiplierWhite;
+                streakText.GetComponent<TextMesh>().color = new Color(0.26f, 0.26f, 0.26f);
                 multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
                 streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
                 // hihat
@@ -381,6 +386,7 @@ public class SongManager : MonoBehaviour {
             }
         }
         bassDown = Input.GetKeyDown(bassKey);
+        updateTextAnimations();
         // endgame logic
         if ((startFlag && !songAudio.isPlaying) || songAudio == null)
         {
@@ -458,6 +464,35 @@ public class SongManager : MonoBehaviour {
                 DestroyImmediate(beatTicks.ElementAt(i));
                 beatTicks.RemoveAt(i);
             }
+        }
+    }
+
+    private void updateTextAnimations()
+    {
+        float dt = Time.fixedDeltaTime;
+        // multiplier text animations
+        if (multiplierText.transform.localScale.x > 0.5f)
+        {
+            Vector3 oldScale = multiplierText.transform.localScale;
+            multiplierText.transform.localScale = new Vector3(oldScale.x - 1.5f * Time.fixedDeltaTime, oldScale.y, oldScale.z);
+        }
+        if (streakText.transform.localScale.x > 0.5f)
+        {
+            Vector3 oldScale = streakText.transform.localScale;
+            streakText.transform.localScale = new Vector3(oldScale.x - 0.5f * Time.fixedDeltaTime, oldScale.y, oldScale.z);
+        }
+        if ((streak == 50 || streak % 100 == 0) && streak > 0)
+        {
+            streakPopup.GetComponent<TextMesh>().text = streak + " NOTE STREAK!!!";
+            streakPopup.GetComponent<TextMesh>().color = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+            streakPopup.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        }
+        if (streakPopup.GetComponent<TextMesh>().color.a > 0)
+        {
+            Vector3 oldScale = streakPopup.transform.localScale;
+            streakPopup.transform.localScale = new Vector3(oldScale.x + Mathf.Cos(Time.fixedDeltaTime * 20) * .0025f, oldScale.y + Mathf.Cos(Time.fixedDeltaTime * 20) * .0025f, oldScale.z);
+            Color previousStreakPopup = streakPopup.GetComponent<TextMesh>().color;
+            streakPopup.GetComponent<TextMesh>().color = new Color(previousStreakPopup.r, previousStreakPopup.g, previousStreakPopup.b, previousStreakPopup.a - Time.fixedDeltaTime);
         }
     }
 
@@ -548,6 +583,12 @@ public class SongManager : MonoBehaviour {
         float sAmount = streak > 40 ? 40 : streak;
         streakText.GetComponent<TextMesh>().color = new Color((s + sr * sAmount / 40.0f) / 255.0f,
             (s + sg * sAmount / 40.0f) / 255.0f, (s + sb * sAmount / 40.0f)/ 255.0f);
+        // update text scale
+        if (streak > 0 && streak % 10 == 0)
+        {
+            multiplierText.transform.localScale = new Vector3(0.7f, 0.5f, 0.5f);
+        }
+        streakText.transform.localScale = new Vector3(0.55f, 0.5f, 0.5f);
         // update text
         multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
         streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
