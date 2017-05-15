@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class StickRightManager : MonoBehaviour
 {
@@ -23,7 +24,17 @@ public class StickRightManager : MonoBehaviour
         rightDevice = SteamVR_Controller.Input((int)rightHand.index);
         if (rightDevice.GetPressDown(SteamVR_Controller.ButtonMask.ApplicationMenu))
         {
-            //SteamVR.instance.hmd.ResetSeatedZeroPose();
+            // end playScene if right controller menu button is hit
+            if (SceneManager.GetActiveScene().name == "playScene")
+            {
+                ApplicationModel.score = 0;
+                ApplicationModel.highStreak = 0;
+                ApplicationModel.notesMissed = 0;
+                ApplicationModel.percentHit = 0;
+                ApplicationModel.selectedSongId = null;
+                ApplicationModel.songName = null;
+                SceneManager.LoadScene("startMenu");
+            }
             actionMenuPressed = true;
         }
         else if (rightDevice.GetPressUp(SteamVR_Controller.ButtonMask.ApplicationMenu)) {
