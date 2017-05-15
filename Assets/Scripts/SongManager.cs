@@ -50,6 +50,11 @@ public class SongManager : MonoBehaviour {
     private int notesMissed = 0;
     private int notesHit = 0;
     public GameObject multiplierText;
+    public Color multiplierWhite = new Color(1, 1, 1, 1);
+    public Color multiplierGreen = new Color(0.43f, 0.68f, 0.33f, 1);
+    public Color multiplierBlue = new Color(0.10f, 0.59f, 0.88f, 1);
+    public Color multiplierPink = new Color(1.00f, 0.05f, 0.72f, 1);
+    public Color multiplierPurple = new Color(0.62f, 0.00f, 1.00f, 1);
     public GameObject streakText;
     public GameObject scoreText;
     private bool bassAvailable = false;
@@ -72,7 +77,7 @@ public class SongManager : MonoBehaviour {
         songName = ApplicationModel.selectedSongId;
         bassAvailable = ApplicationModel.bassAvailable;
         bassKey = ApplicationModel.bassKey;
-        Debug.Log("available: " + bassAvailable + " key: " + bassKey);
+        Debug.Log("Bass available: " + bassAvailable + " key: " + bassKey);
         // init audio
         string prefix = fPrefix + Application.streamingAssetsPath + "/" + songName + "/";
         audioSources = GetComponents<AudioSource>();
@@ -518,6 +523,32 @@ public class SongManager : MonoBehaviour {
         multiplier = (multiplier > 5) ? 5 : multiplier;
         if (streak > 0)
             score += multiplier * 10;
+        // update multiplierText color
+        switch (multiplier)
+        {
+            case 2:
+                multiplierText.GetComponent<TextMesh>().color = multiplierGreen;
+                break;
+            case 3:
+                multiplierText.GetComponent<TextMesh>().color = multiplierBlue;
+                break;
+            case 4:
+                multiplierText.GetComponent<TextMesh>().color = multiplierPink;
+                break;
+            case 5:
+                multiplierText.GetComponent<TextMesh>().color = multiplierPurple;
+                break;
+            default:
+                multiplierText.GetComponent<TextMesh>().color = multiplierWhite;
+                break;
+        }
+        // update streakText color
+        float s = 66.0f;
+        float sr = 159.0f, sg = 143.0f, sb = -66.0f;
+        float sAmount = streak > 40 ? 40 : streak;
+        streakText.GetComponent<TextMesh>().color = new Color((s + sr * sAmount / 40.0f) / 255.0f,
+            (s + sg * sAmount / 40.0f) / 255.0f, (s + sb * sAmount / 40.0f)/ 255.0f);
+        // update text
         multiplierText.GetComponent<TextMesh>().text = "Multiplier: x" + multiplier;
         streakText.GetComponent<TextMesh>().text = "Streak: " + streak;
         scoreText.GetComponent<TextMesh>().text = "Score: " + score;
