@@ -10,7 +10,7 @@ public class SongManager : MonoBehaviour {
 
     // constants
     private const float EPSILON = 0.022f;
-    private const float AUDIO_DELAY = 0.1f;
+    private const float AUDIO_DELAY = 0.08f;
     private const float HIT_WINDOW = 0.22f;
     private const string PREFAB_DIR = "Prefabs/";
     private const string SONG_DIR = "SongData/";
@@ -584,7 +584,7 @@ public class SongManager : MonoBehaviour {
         streakText.GetComponent<TextMesh>().color = new Color((s + sr * sAmount / 40.0f) / 255.0f,
             (s + sg * sAmount / 40.0f) / 255.0f, (s + sb * sAmount / 40.0f)/ 255.0f);
         // update text scale
-        if (streak > 0 && streak % 10 == 0)
+        if (streak > 0 && streak % 10 == 0 && streak < 50)
         {
             multiplierText.transform.localScale = new Vector3(0.7f, 0.5f, 0.5f);
         }
