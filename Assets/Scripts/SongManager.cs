@@ -183,19 +183,19 @@ public class SongManager : MonoBehaviour {
             // move the notes horizontally based upon their 
             if (isHiHat(curRollNote))
             {
-                curRollNote.rollNote.transform.Translate(new Vector3(-.02f, 0.0f, 0.0f));
+                curRollNote.rollNote.transform.Translate(new Vector3(-.04f, 0.0f, 0.0f));
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
                     ApplicationModel.hiHatColor;
             }
             else if (isSnare(curRollNote))
             {
-                curRollNote.rollNote.transform.Translate(new Vector3(-.05f, 0.0f, 0.0f));
+                curRollNote.rollNote.transform.Translate(new Vector3(-.06f, 0.0f, 0.0f));
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
                     ApplicationModel.snareColor;
             }
             else if (isCrash(curRollNote))
             {
-                curRollNote.rollNote.transform.Translate(new Vector3(-0.01f, 0.0f, 0.0f));
+                curRollNote.rollNote.transform.Translate(new Vector3(-0.02f, 0.0f, 0.0f));
                 curRollNote.rollNote.GetComponent<MeshRenderer>().material.color =
                     ApplicationModel.crashColor;
             }
@@ -402,11 +402,11 @@ public class SongManager : MonoBehaviour {
     // helper boolean functions to determine what kind of hit it is
     private bool isBass(Note note)
     {
-        return note.value == "C3";
+        return note.value == "C3" || note.value == "B2";
     }
     private bool isSnare(Note note)
     {
-        return note.value == "D3" || note.value == "E3" || note.value == "A#2";
+        return note.value == "D3" || note.value == "E3" || note.value == "A#2" || note.value == "C#3";
     }
     private bool isHiHat(Note note)
     {
