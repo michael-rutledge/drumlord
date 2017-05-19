@@ -388,7 +388,8 @@ public class SongManager : MonoBehaviour {
         bassDown = Input.GetKeyDown(bassKey);
         updateTextAnimations();
         // endgame logic
-        if ((startFlag && !songAudio.isPlaying) || songAudio == null)
+        if ((startFlag && !songAudio.isPlaying && !snareAudio.isPlaying && !bassAudio.isPlaying
+            && !hihatAudio.isPlaying && !tomAudio.isPlaying && !cymbalAudio.isPlaying) || songAudio == null)
         {
             ApplicationModel.score = score;
             ApplicationModel.highStreak = highStreak;
