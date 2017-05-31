@@ -24,6 +24,12 @@ public class SongMenuManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        // take care of bassAvailable text in start
+        if (ApplicationModel.bassAvailable)
+        {
+            GameObject.Find("BassText").GetComponent<Text>().text = "Bass pedal found! Bound to key: \"" +
+                ApplicationModel.bassKey.ToString() + "\"";
+        }
         // get string arrays for the song data
         songDataIds = System.IO.Directory.GetDirectories(Application.streamingAssetsPath);
         for (int i = 0; i < songDataIds.Length; i++)
